@@ -1,0 +1,11 @@
+{
+  "name": "virtual",
+  "version": "0.0.1",
+  "private": true,
+  "license": "MIT",
+  "author": "Chris Feijoo",
+  "devDependencies": {
+    "typebolt": "^0.7.0",
+    "typescript": "^5.6.3"
+  }
+}
