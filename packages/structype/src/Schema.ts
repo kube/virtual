@@ -1,7 +1,7 @@
 export type Schema_ID = {
   _structype: "id";
   description?: string;
-}
+};
 
 export type Schema_Number = {
   _structype: "number";
@@ -19,10 +19,7 @@ export type Schema_Boolean = {
   description?: string;
 };
 
-export type Schema_Primitive =
-  | Schema_Number
-  | Schema_String
-  | Schema_Boolean;
+export type Schema_Primitive = Schema_Number | Schema_String | Schema_Boolean;
 
 export type Schema_Literal = {
   _structype: "literal";
@@ -60,6 +57,15 @@ export type Schema_Interface = {
       description?: string;
       nullable?: boolean;
       type:
+        | Schema_ID
+        | Schema_Primitive
+        | Schema_Literal
+        | Schema_Reference_Named
+        | Schema_Scalar
+        | Schema_Record
+        | Schema_Array;
+    }>;
+    type:
       | Schema_ID
       | Schema_Primitive
       | Schema_Literal
@@ -67,17 +73,8 @@ export type Schema_Interface = {
       | Schema_Scalar
       | Schema_Record
       | Schema_Array;
-    }>;
-    type:
-    | Schema_ID
-    | Schema_Primitive
-    | Schema_Literal
-    | Schema_Reference_Named
-    | Schema_Scalar
-    | Schema_Record
-    | Schema_Array;
   }>;
-}
+};
 
 export type Schema_Record = {
   _structype: "record";
@@ -92,6 +89,16 @@ export type Schema_Record = {
       description?: string;
       nullable?: boolean;
       type:
+        | Schema_ID
+        | Schema_Primitive
+        | Schema_Literal
+        | Schema_Reference_Named
+        | Schema_Scalar
+        | Schema_Record
+        | Schema_Array;
+    }>;
+    nullable?: boolean;
+    type:
       | Schema_ID
       | Schema_Primitive
       | Schema_Literal
@@ -99,29 +106,19 @@ export type Schema_Record = {
       | Schema_Scalar
       | Schema_Record
       | Schema_Array;
-    }>;
-    nullable?: boolean;
-    type:
-    | Schema_ID
-    | Schema_Primitive
-    | Schema_Literal
-    | Schema_Reference_Named
-    | Schema_Scalar
-    | Schema_Record
-    | Schema_Array;
-  }>
+  }>;
 };
 
 export type Schema_Array = {
   _structype: "array";
   nullableItems?: boolean;
   item:
-  | Schema_Primitive
-  | Schema_Literal
-  | Schema_Reference_Named
-  | Schema_Scalar
-  | Schema_Record
-  | Schema_Array;
+    | Schema_Primitive
+    | Schema_Literal
+    | Schema_Reference_Named
+    | Schema_Scalar
+    | Schema_Record
+    | Schema_Array;
 };
 
 // TODO: In the future Enums could also support default index-based values (like C or TypeScript do by default).
@@ -131,14 +128,14 @@ export type Schema_Enum = {
   name: string;
   description?: string;
   values: Array<string>;
-}
+};
 
 export type Schema_Union = {
   _structype: "union";
   name?: string; // name is optional because unions can be anonymous in TypeScript
   description?: string;
   types: Array<Schema_Reference_Named>; // TODO: Support inline unions
-}
+};
 
 export type Schema_Input = {
   _structype: "input";
@@ -148,20 +145,26 @@ export type Schema_Input = {
     name: string;
     description?: string;
     type:
-    | Schema_ID
-    | Schema_Primitive
-    | Schema_Literal
-    | Schema_Reference_Named
-    | Schema_Scalar
-    | Schema_Record
-    | Schema_Array;
+      | Schema_ID
+      | Schema_Primitive
+      | Schema_Literal
+      | Schema_Reference_Named
+      | Schema_Scalar
+      | Schema_Record
+      | Schema_Array;
   }>;
-}
+};
 
 export type Schema_Index = {
   _structype: "index";
   description?: string;
   types: {
-    [k: string]: Schema_Record | Schema_Scalar | Schema_Enum | Schema_Interface | Schema_Union | Schema_Input;
+    [k: string]:
+      | Schema_Record
+      | Schema_Scalar
+      | Schema_Enum
+      | Schema_Interface
+      | Schema_Union
+      | Schema_Input;
   };
 };

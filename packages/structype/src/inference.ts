@@ -32,22 +32,24 @@ type Infer_RecordSchemaField<
   S extends Schema_Record["fields"][number],
   Root extends Schema_Index | never = never
 > =
-  (S['type'] extends Schema_Reference_Named
-    ? Infer_Reference_Named<S['type'], Root>
-    : S['type'] extends Schema_Primitive
-    ? Infer_Primitive<S['type']>
-    : S['type'] extends Schema_Scalar
-    ? Infer_Scalar<S['type']>
-    : never)
-  | (S['nullable'] extends true ? null : never);
-
+  | (S["type"] extends Schema_Reference_Named
+      ? Infer_Reference_Named<S["type"], Root>
+      : S["type"] extends Schema_Primitive
+      ? Infer_Primitive<S["type"]>
+      : S["type"] extends Schema_Scalar
+      ? Infer_Scalar<S["type"]>
+      : never)
+  | (S["nullable"] extends true ? null : never);
 
 export type Infer_RecordSchema<
   S extends Schema_Record,
   Root extends Schema_Index | never = never
 > = {
-    [K in S["fields"][number]['name']]: Infer_RecordSchemaField<S["fields"][number] & { name: K }, Root>
-  }
+  [K in S["fields"][number]["name"]]: Infer_RecordSchemaField<
+    S["fields"][number] & { name: K },
+    Root
+  >;
+};
 
 export type Infer_Scalar<_S extends Schema_Scalar> = any; // TODO: Use additional info
 
@@ -62,18 +64,17 @@ export type Infer_Array<
 
 export type Infer_Schema<
   S extends
-  | Schema_Primitive
-  | Schema_Literal
-  | Schema_Record
-  | Schema_Scalar
-  | Schema_Array
-  | Schema_Reference_Thunk
-  | Schema_Reference_Named
-  | Schema_Input
-  | Schema_Interface
-  | Schema_Enum
-  | Schema_Union
-  ,
+    | Schema_Primitive
+    | Schema_Literal
+    | Schema_Record
+    | Schema_Scalar
+    | Schema_Array
+    | Schema_Reference_Thunk
+    | Schema_Reference_Named
+    | Schema_Input
+    | Schema_Interface
+    | Schema_Enum
+    | Schema_Union,
   Root extends Schema_Index | never = never
 > = S extends Schema_Scalar
   ? S["name"]
