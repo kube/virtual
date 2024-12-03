@@ -29,11 +29,10 @@ test("Simple type", () => {
     },
   } as const satisfies Schema_Index;
 
-
   expect(result).toEqual(expected);
 });
 
-test('support comments', () => {
+test("support comments", () => {
   // GIVEN
   const input = `
     type Person {
@@ -55,15 +54,23 @@ test('support comments', () => {
         _structype: "record",
         name: "Person",
         fields: [
-          { name: "name", description: "The person's name", type: { _structype: "string" } },
-          { name: "age", description: "The person's age", type: { _structype: "number", int: true } },
+          {
+            name: "name",
+            description: "The person's name",
+            type: { _structype: "string" },
+          },
+          {
+            name: "age",
+            description: "The person's age",
+            type: { _structype: "number", int: true },
+          },
         ],
       },
     },
   } as const satisfies Schema_Index;
 
   expect(result).toEqual(expected);
-})
+});
 
 test("supports ID", () => {
   // GIVEN
@@ -83,9 +90,7 @@ test("supports ID", () => {
       Person: {
         _structype: "record",
         name: "Person",
-        fields: [
-          { name: "id", type: { _structype: "id" } },
-        ],
+        fields: [{ name: "id", type: { _structype: "id" } }],
       },
     },
   } as const satisfies Schema_Index;
@@ -93,7 +98,7 @@ test("supports ID", () => {
   expect(result).toEqual(expected);
 });
 
-test('supports boolean', () => {
+test("supports boolean", () => {
   // GIVEN
   const input = `
     type Person {
@@ -111,15 +116,13 @@ test('supports boolean', () => {
       Person: {
         _structype: "record",
         name: "Person",
-        fields: [
-          { name: "isStudent", type: { _structype: "boolean" } },
-        ]
+        fields: [{ name: "isStudent", type: { _structype: "boolean" } }],
       },
     },
   } as const satisfies Schema_Index;
 
   expect(result).toEqual(expected);
-})
+});
 
 test("supports lists", () => {
   // GIVEN
@@ -142,7 +145,7 @@ test("supports lists", () => {
         fields: [
           {
             name: "friends",
-            type: { _structype: "array", item: { _structype: "string" } }
+            type: { _structype: "array", item: { _structype: "string" } },
           },
         ],
       },
@@ -206,7 +209,10 @@ test("supports nested types", () => {
         name: "Person",
         fields: [
           { name: "name", type: { _structype: "string" } },
-          { name: "address", type: { _structype: "ref_named", ref: "Address" } },
+          {
+            name: "address",
+            type: { _structype: "ref_named", ref: "Address" },
+          },
         ],
       },
       Address: {
@@ -246,7 +252,10 @@ test("supports circular types", () => {
           { name: "name", type: { _structype: "string" } },
           {
             name: "friends",
-            type: { _structype: "array", item: { _structype: "ref_named", ref: "Person" } }
+            type: {
+              _structype: "array",
+              item: { _structype: "ref_named", ref: "Person" },
+            },
           },
         ],
       },
@@ -254,7 +263,7 @@ test("supports circular types", () => {
   } as const satisfies Schema_Index;
 
   expect(result).toEqual(expected);
-})
+});
 
 test("supports enums", () => {
   // GIVEN
@@ -317,9 +326,7 @@ test("supports interfaces", () => {
       Named: {
         _structype: "interface",
         name: "Named",
-        fields: [
-          { name: "name", type: { _structype: "string" } },
-        ],
+        fields: [{ name: "name", type: { _structype: "string" } }],
       },
       Person: {
         _structype: "record",
@@ -363,16 +370,12 @@ test("supports multiple interfaces", () => {
       Named: {
         _structype: "interface",
         name: "Named",
-        fields: [
-          { name: "name", type: { _structype: "string" } },
-        ],
+        fields: [{ name: "name", type: { _structype: "string" } }],
       },
       Aged: {
         _structype: "interface",
         name: "Aged",
-        fields: [
-          { name: "age", type: { _structype: "number", int: true } },
-        ],
+        fields: [{ name: "age", type: { _structype: "number", int: true } }],
       },
       Person: {
         _structype: "record",
@@ -420,16 +423,12 @@ test("supports unions", () => {
       Dog: {
         _structype: "record",
         name: "Dog",
-        fields: [
-          { name: "name", type: { _structype: "string" } },
-        ],
+        fields: [{ name: "name", type: { _structype: "string" } }],
       },
       Cat: {
         _structype: "record",
         name: "Cat",
-        fields: [
-          { name: "name", type: { _structype: "string" } },
-        ],
+        fields: [{ name: "name", type: { _structype: "string" } }],
       },
       Pet: {
         _structype: "union",
@@ -479,10 +478,10 @@ test("supports functions", () => {
         ],
       },
     },
-  }
+  };
 
   expect(result).toEqual(expected);
-})
+});
 
 test("supports input types", () => {
   // GIVEN
@@ -523,7 +522,12 @@ test("supports input types", () => {
         fields: [
           {
             name: "person",
-            args: [{ name: "input", type: { _structype: "ref_named", ref: "PersonInput" } }],
+            args: [
+              {
+                name: "input",
+                type: { _structype: "ref_named", ref: "PersonInput" },
+              },
+            ],
             type: { _structype: "ref_named", ref: "Person" },
           },
         ],

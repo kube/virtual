@@ -1,9 +1,18 @@
 // import { type } from "@kube/structype";
 
-import { Schema_Array, Schema_Enum, Schema_Index, Schema_Interface, Schema_Record, Schema_Union } from "@kube/structype";
+import {
+  Schema_Array,
+  Schema_Enum,
+  Schema_Index,
+  Schema_Interface,
+  Schema_Record,
+  Schema_Union,
+} from "@kube/structype";
 import * as graphql from "graphql";
 
-function toStructype_from_EnumTypeDefinition(node: graphql.EnumTypeDefinitionNode) {
+function toStructype_from_EnumTypeDefinition(
+  node: graphql.EnumTypeDefinitionNode
+) {
   if (!node.values || node.values.length === 0) {
     throw new Error("Enum must have at least one value");
   }
@@ -19,26 +28,26 @@ function toStructype_from_NamedType(node: graphql.NamedTypeNode) {
     case "ID":
       return { _structype: "id" } as const;
 
-    case 'String':
-      return { _structype: 'string' } as const
+    case "String":
+      return { _structype: "string" } as const;
 
     case "Boolean":
       return { _structype: "boolean" } as const;
 
-    case 'Int':
-    case 'Float':
-      return { _structype: 'number', int: node.name.value === 'Int' } as const
+    case "Int":
+    case "Float":
+      return { _structype: "number", int: node.name.value === "Int" } as const;
 
     default:
       // TODO: Check if reference exists?
-      return { _structype: 'ref_named', ref: node.name.value } as const
+      return { _structype: "ref_named", ref: node.name.value } as const;
   }
 }
 
 function toStructype_from_TypeNode(node: graphql.TypeNode) {
   switch (node.kind) {
     case "NamedType":
-      return toStructype_from_NamedType(node)
+      return toStructype_from_NamedType(node);
 
     case "ListType":
       return toStructype_from_ListType(node);
@@ -53,8 +62,8 @@ function toStructype_from_TypeNode(node: graphql.TypeNode) {
 }
 
 function toStructype_from_ListType(node: graphql.ListTypeNode): Schema_Array {
-  const nullableItems = node.type.kind !== 'NonNullType';
-  const typeNode = nullableItems ? node.type : node.type.type
+  const nullableItems = node.type.kind !== "NonNullType";
+  const typeNode = nullableItems ? node.type : node.type.type;
   const item = toStructype_from_TypeNode(typeNode);
 
   // TODO: Check if ID is allowed in a list?
@@ -63,31 +72,35 @@ function toStructype_from_ListType(node: graphql.ListTypeNode): Schema_Array {
   return {
     _structype: "array",
     item,
-    ...nullableItems && { nullableItems },
+    ...(nullableItems && { nullableItems }),
   } as const;
 }
 
 function toStructype_from_FieldDefinition(node: graphql.FieldDefinitionNode) {
-  const nullable = node.type.kind !== 'NonNullType';
-  const typeNode = nullable ? node.type : node.type.type
-  const description = node.description?.value
+  const nullable = node.type.kind !== "NonNullType";
+  const typeNode = nullable ? node.type : node.type.type;
+  const description = node.description?.value;
 
-  const args = node.arguments?.length ? node.arguments.map((node) => {
-    const nullable = node.type.kind !== 'NonNullType';
-    const typeNode = nullable ? node.type : node.type.type
-    return {
-      name: node.name.value,
-      ...description && { description },
-      ...nullable && { nullable },
-      type: toStructype_from_TypeNode(typeNode),
-    } as const satisfies NonNullable<Schema_Record["fields"][number]["args"]>[number];
-  }) : undefined;
+  const args = node.arguments?.length
+    ? node.arguments.map((node) => {
+        const nullable = node.type.kind !== "NonNullType";
+        const typeNode = nullable ? node.type : node.type.type;
+        return {
+          name: node.name.value,
+          ...(description && { description }),
+          ...(nullable && { nullable }),
+          type: toStructype_from_TypeNode(typeNode),
+        } as const satisfies NonNullable<
+          Schema_Record["fields"][number]["args"]
+        >[number];
+      })
+    : undefined;
 
   return {
     name: node.name.value,
-    ...description && { description },
-    ...nullable && { nullable },
-    ...args && { args },
+    ...(description && { description }),
+    ...(nullable && { nullable }),
+    ...(args && { args }),
     type: toStructype_from_TypeNode(typeNode),
   } as const satisfies Schema_Record["fields"][number];
 }
@@ -113,17 +126,19 @@ function toStructype_from_ObjectTypeDefinition(
     throw new Error("Object must have at least one field");
   }
 
-  const implements_ = node.interfaces?.length ? node.interfaces?.map((node) => {
-    if (node.kind !== "NamedType") {
-      throw new Error("Unexpected kind");
-    }
-    return { _structype: "ref_named", ref: node.name.value } as const;
-  }) : undefined
+  const implements_ = node.interfaces?.length
+    ? node.interfaces?.map((node) => {
+        if (node.kind !== "NamedType") {
+          throw new Error("Unexpected kind");
+        }
+        return { _structype: "ref_named", ref: node.name.value } as const;
+      })
+    : undefined;
 
   return {
     _structype: "record",
     name: node.name.value,
-    ...implements_ && { implements: implements_ },
+    ...(implements_ && { implements: implements_ }),
     fields: node.fields.map(toStructype_from_FieldDefinition),
   };
 }
@@ -140,7 +155,7 @@ function toStructype_from_UnionTypeDefinition(
   return {
     _structype: "union",
     name: node.name.value,
-    ...description && { description },
+    ...(description && { description }),
     types: node.types?.map((node) => {
       if (node.kind !== "NamedType") {
         throw new Error("Unexpected kind");
@@ -150,20 +165,24 @@ function toStructype_from_UnionTypeDefinition(
   };
 }
 
-function toStructype_from_InputFieldDefinition(node: graphql.InputValueDefinitionNode) {
-  const nullable = node.type.kind !== 'NonNullType';
-  const typeNode = nullable ? node.type : node.type.type
-  const description = node.description?.value
+function toStructype_from_InputFieldDefinition(
+  node: graphql.InputValueDefinitionNode
+) {
+  const nullable = node.type.kind !== "NonNullType";
+  const typeNode = nullable ? node.type : node.type.type;
+  const description = node.description?.value;
 
   return {
     name: node.name.value,
-    ...description && { description },
-    ...nullable && { nullable },
+    ...(description && { description }),
+    ...(nullable && { nullable }),
     type: toStructype_from_TypeNode(typeNode),
   } as const satisfies Schema_Record["fields"][number];
 }
 
-function toStructype_from_InputObjectTypeDefinition(node: graphql.InputObjectTypeDefinitionNode) {
+function toStructype_from_InputObjectTypeDefinition(
+  node: graphql.InputObjectTypeDefinitionNode
+) {
   if (!node.fields || node.fields.length === 0) {
     throw new Error("Input Object must have at least one field");
   }
