@@ -13,7 +13,6 @@ import { HKT } from "../HKT";
   }
 
   // THEN
-  type X = HKT.Call<$Identity, 42>;
   Assert<IsExactType<HKT.Call<$Identity, 42>, 42>>();
 }
 
@@ -25,7 +24,6 @@ import { HKT } from "../HKT";
   }
 
   // THEN
-  type X = HKT.Call<$ToString, 42>;
   Assert<IsExactType<HKT.Call<$ToString, 42>, "42">>();
 
   // @ts-expect-error: Not allowed because only accepts number
