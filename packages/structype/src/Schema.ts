@@ -144,6 +144,7 @@ export type Schema_Input = {
   fields: Array<{
     name: string;
     description?: string;
+    nullable?: boolean;
     type:
       | Schema_ID
       | Schema_Primitive
@@ -168,3 +169,21 @@ export type Schema_Index = {
       | Schema_Input;
   };
 };
+
+export type Schema =
+  | Schema_ID
+  | Schema_Number
+  | Schema_String
+  | Schema_Boolean
+  | Schema_Primitive
+  | Schema_Literal
+  | Schema_Reference_Named
+  | Schema_Reference_Thunk
+  | Schema_Scalar
+  | Schema_Interface
+  | Schema_Record
+  | Schema_Array
+  | Schema_Enum
+  | Schema_Union
+  | Schema_Input
+  | Schema_Index;
