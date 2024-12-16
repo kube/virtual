@@ -21,13 +21,7 @@ importers:
         specifier: ^2.1.6
         version: 2.1.6
 
-  packages/hkt: {}
-
-  packages/structype:
-    dependencies:
-      '@kube/hkt':
-        specifier: workspace:*
-        version: link:../hkt
+  packages/structype: {}
 
   packages/structype-graphql:
     dependencies:

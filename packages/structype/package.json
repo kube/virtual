@@ -10,8 +10,5 @@
     "build": "tsc",
     "dev": "tsc --watch",
     "typecheck": "tsc --noEmit"
-  },
-  "dependencies": {
-    "@kube/hkt": "workspace:*"
   }
 }
