@@ -1,4 +1,5 @@
 import {
+  Schema,
   Schema_Array,
   Schema_Enum,
   Schema_Index,
@@ -9,215 +10,104 @@ import {
 } from "@kube/structype";
 import * as graphql from "graphql";
 
+function toGraphql_NamedType(schema: Schema): graphql.NamedTypeNode {
+  let typeName;
+
+  switch (schema._structype) {
+    case "string":
+      typeName = "String";
+      break;
+
+    case "number":
+      typeName = schema.int ? "Int" : "Float";
+      break;
+
+    case "id":
+      typeName = "ID";
+      break;
+
+    case "boolean":
+      typeName = "Boolean";
+      break;
+
+    case "ref_named":
+      typeName = schema.ref;
+      break;
+
+    default:
+      throw new Error(`Unsupported type: ${schema._structype}`);
+  }
+  return {
+    kind: graphql.Kind.NAMED_TYPE,
+    name: { kind: graphql.Kind.NAME, value: typeName },
+  };
+}
+
+function toGraphql_Description(description: string | undefined) {
+  return description
+    ? { kind: graphql.Kind.STRING as const, value: description }
+    : undefined;
+}
+
+function nullableIf<T extends graphql.TypeNode>(
+  condition: boolean | undefined,
+  type: T
+) {
+  return condition ? type : { kind: graphql.Kind.NON_NULL_TYPE as const, type };
+}
+
 function toGraphql_from_Schema_Record_Field(
   schemaField: Schema_Record["fields"][number]
 ): graphql.FieldDefinitionNode {
+  // Array
+
   if (schemaField.type._structype === "array") {
     return {
       kind: graphql.Kind.FIELD_DEFINITION,
       name: { kind: graphql.Kind.NAME, value: schemaField.name },
-      type: schemaField.nullable
-        ? toGraphql_from_Schema_Array(schemaField.type)
-        : {
-            kind: graphql.Kind.NON_NULL_TYPE,
-            type: toGraphql_from_Schema_Array(schemaField.type),
-          },
+      type: nullableIf(
+        schemaField.nullable,
+        toGraphql_from_Schema_Array(schemaField.type)
+      ),
       arguments: schemaField.args?.map((arg) => {
-        let type;
-
-        switch (arg.type._structype) {
-          case "string":
-            type = "String";
-            break;
-
-          case "number":
-            type = arg.type.int ? "Int" : "Float";
-            break;
-
-          case "id":
-            type = "ID";
-            break;
-
-          case "boolean":
-            type = "Boolean";
-            break;
-
-          case "ref_named":
-            type = arg.type.ref;
-            break;
-
-          default:
-            throw new Error(`Unsupported type: ${arg.type._structype}`);
-        }
-
         return {
           kind: graphql.Kind.INPUT_VALUE_DEFINITION,
           name: { kind: graphql.Kind.NAME, value: arg.name },
-          type: arg.nullable
-            ? {
-                kind: graphql.Kind.NAMED_TYPE,
-                name: { kind: graphql.Kind.NAME, value: type },
-              }
-            : {
-                kind: graphql.Kind.NON_NULL_TYPE,
-                type: {
-                  kind: graphql.Kind.NAMED_TYPE,
-                  name: { kind: graphql.Kind.NAME, value: type },
-                },
-              },
-          description: arg.description
-            ? { kind: graphql.Kind.STRING, value: arg.description }
-            : undefined,
+          type: nullableIf(arg.nullable, toGraphqlNamedTypeName(arg.type)),
+          description: toGraphql_Description(arg.description),
         };
       }),
-      description: schemaField.description
-        ? { kind: graphql.Kind.STRING, value: schemaField.description }
-        : undefined,
+      description: toGraphql_Description(schemaField.description),
     };
   }
 
-  // NamedType
-
-  let schemaTypeName: string;
-
-  switch (schemaField.type._structype) {
-    case "string":
-      schemaTypeName = "String";
-      break;
-
-    case "number":
-      schemaTypeName = schemaField.type.int ? "Int" : "Float";
-      break;
-
-    case "id":
-      schemaTypeName = "ID";
-      break;
-
-    case "boolean":
-      schemaTypeName = "Boolean";
-      break;
-
-    case "ref_named":
-      schemaTypeName = schemaField.type.ref;
-      break;
-
-    default:
-      throw new Error(`Unsupported type: ${schemaField.type._structype}`);
-  }
-
-  const schemaFinalType: graphql.NamedTypeNode = {
-    kind: graphql.Kind.NAMED_TYPE,
-    name: {
-      kind: graphql.Kind.NAME,
-      value: schemaTypeName,
-    },
-  };
+  // Named Type
 
   return {
     kind: graphql.Kind.FIELD_DEFINITION,
     name: { kind: graphql.Kind.NAME, value: schemaField.name },
-    type: schemaField.nullable
-      ? schemaFinalType
-      : {
-          kind: graphql.Kind.NON_NULL_TYPE,
-          type: schemaFinalType,
-        },
+    type: nullableIf(
+      schemaField.nullable,
+      toGraphql_NamedType(schemaField.type)
+    ),
     arguments: schemaField.args?.map((arg) => {
-      let type;
-
-      switch (arg.type._structype) {
-        case "string":
-          type = "String";
-          break;
-
-        case "number":
-          type = arg.type.int ? "Int" : "Float";
-          break;
-
-        case "id":
-          type = "ID";
-          break;
-
-        case "boolean":
-          type = "Boolean";
-          break;
-
-        case "ref_named":
-          type = arg.type.ref;
-          break;
-
-        default:
-          throw new Error(`Unsupported type: ${arg.type._structype}`);
-      }
-
       return {
         kind: graphql.Kind.INPUT_VALUE_DEFINITION,
         name: { kind: graphql.Kind.NAME, value: arg.name },
-        type: arg.nullable
-          ? {
-              kind: graphql.Kind.NAMED_TYPE,
-              name: { kind: graphql.Kind.NAME, value: type },
-            }
-          : {
-              kind: graphql.Kind.NON_NULL_TYPE,
-              type: {
-                kind: graphql.Kind.NAMED_TYPE,
-                name: { kind: graphql.Kind.NAME, value: type },
-              },
-            },
-        description: arg.description
-          ? { kind: graphql.Kind.STRING, value: arg.description }
-          : undefined,
+        type: nullableIf(arg.nullable, toGraphql_NamedType(arg.type)),
+        description: toGraphql_Description(arg.description),
       };
     }),
-    description: schemaField.description
-      ? { kind: graphql.Kind.STRING, value: schemaField.description }
-      : undefined,
+    description: toGraphql_Description(schemaField.description),
   };
 }
 
 function toGraphql_from_Schema_Array(
   schema: Schema_Array
 ): graphql.ListTypeNode {
-  let itemTypeName;
-
-  switch (schema.item._structype) {
-    case "ref_named":
-      itemTypeName = schema.item.ref;
-      break;
-
-    case "string":
-      itemTypeName = "String";
-      break;
-
-    case "number":
-      itemTypeName = schema.item.int ? "Int" : "Float";
-      break;
-
-    case "boolean":
-      itemTypeName = "Boolean";
-      break;
-
-    default:
-      throw new Error(`Unsupported type: ${schema.item._structype}`);
-  }
-
-  const itemType = {
-    kind: graphql.Kind.NAMED_TYPE,
-    name: {
-      kind: graphql.Kind.NAME,
-      value: itemTypeName,
-    },
-  } as const;
-
   return {
     kind: graphql.Kind.LIST_TYPE,
-    type: schema.nullableItems
-      ? itemType
-      : ({
-          kind: graphql.Kind.NON_NULL_TYPE,
-          type: itemType,
-        } as const),
+    type: nullableIf(schema.nullableItems, toGraphql_NamedType(schema.item)),
   };
 }
 
@@ -228,9 +118,7 @@ function toGraphql_from_Schema_Record(
     kind: graphql.Kind.OBJECT_TYPE_DEFINITION,
     name: { kind: graphql.Kind.NAME, value: schema.name },
     fields: schema.fields.map(toGraphql_from_Schema_Record_Field),
-    description: schema.description
-      ? { kind: graphql.Kind.STRING, value: schema.description }
-      : undefined,
+    description: toGraphql_Description(schema.description),
     interfaces: schema.implements?.map((ref) => ({
       kind: graphql.Kind.NAMED_TYPE,
       name: { kind: graphql.Kind.NAME, value: ref.ref },
@@ -245,9 +133,7 @@ function toGraphql_from_Schema_Interface(
     kind: graphql.Kind.INTERFACE_TYPE_DEFINITION,
     name: { kind: graphql.Kind.NAME, value: schema.name },
     fields: schema.fields.map(toGraphql_from_Schema_Record_Field),
-    description: schema.description
-      ? { kind: graphql.Kind.STRING, value: schema.description }
-      : undefined,
+    description: toGraphql_Description(schema.description),
   };
 }
 
@@ -261,9 +147,7 @@ function toGraphql_from_Schema_Enum(
       kind: graphql.Kind.ENUM_VALUE_DEFINITION,
       name: { kind: graphql.Kind.NAME, value },
     })),
-    description: schema.description
-      ? { kind: graphql.Kind.STRING, value: schema.description }
-      : undefined,
+    description: toGraphql_Description(schema.description),
   };
 }
 
@@ -276,17 +160,11 @@ function toGraphql_from_Schema_Union(
   if (!schema.name) {
     throw new Error("Union must have a name for GraphQL");
   }
-
   return {
     kind: graphql.Kind.UNION_TYPE_DEFINITION,
     name: { kind: graphql.Kind.NAME, value: schema.name },
-    types: schema.types.map((type) => ({
-      kind: graphql.Kind.NAMED_TYPE,
-      name: { kind: graphql.Kind.NAME, value: type.ref },
-    })),
-    description: schema.description
-      ? { kind: graphql.Kind.STRING, value: schema.description }
-      : undefined,
+    types: schema.types.map(toGraphql_NamedType),
+    description: toGraphql_Description(schema.description),
   };
 }
 
@@ -296,57 +174,13 @@ function toGraphql_from_Schema_Input(
   return {
     kind: graphql.Kind.INPUT_OBJECT_TYPE_DEFINITION,
     name: { kind: graphql.Kind.NAME, value: schema.name },
-    fields: schema.fields.map((field) => {
-      let type;
-
-      switch (field.type._structype) {
-        case "string":
-          type = "String";
-          break;
-
-        case "number":
-          type = field.type.int ? "Int" : "Float";
-          break;
-
-        case "id":
-          type = "ID";
-          break;
-
-        case "boolean":
-          type = "Boolean";
-          break;
-
-        case "ref_named":
-          type = field.type.ref;
-          break;
-
-        default:
-          throw new Error(`Unsupported type: ${field.type._structype}`);
-      }
-
-      return {
-        kind: graphql.Kind.INPUT_VALUE_DEFINITION,
-        name: { kind: graphql.Kind.NAME, value: field.name },
-        type: field.nullable
-          ? {
-              kind: graphql.Kind.NAMED_TYPE,
-              name: { kind: graphql.Kind.NAME, value: type },
-            }
-          : {
-              kind: graphql.Kind.NON_NULL_TYPE,
-              type: {
-                kind: graphql.Kind.NAMED_TYPE,
-                name: { kind: graphql.Kind.NAME, value: type },
-              },
-            },
-        description: field.description
-          ? { kind: graphql.Kind.STRING, value: field.description }
-          : undefined,
-      };
-    }),
-    description: schema.description
-      ? { kind: graphql.Kind.STRING, value: schema.description }
-      : undefined,
+    fields: schema.fields.map((field) => ({
+      kind: graphql.Kind.INPUT_VALUE_DEFINITION,
+      name: { kind: graphql.Kind.NAME, value: field.name },
+      type: nullableIf(field.nullable, toGraphql_NamedType(field.type)),
+      description: toGraphql_Description(field.description),
+    })),
+    description: toGraphql_Description(schema.description),
   };
 }
 
