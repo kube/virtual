@@ -73,7 +73,7 @@ function toGraphql_from_Schema_Record_Field(
         return {
           kind: graphql.Kind.INPUT_VALUE_DEFINITION,
           name: { kind: graphql.Kind.NAME, value: arg.name },
-          type: nullableIf(arg.nullable, toGraphqlNamedTypeName(arg.type)),
+          type: nullableIf(arg.nullable, toGraphql_NamedType(arg.type)),
           description: toGraphql_Description(arg.description),
         };
       }),
@@ -90,14 +90,12 @@ function toGraphql_from_Schema_Record_Field(
       schemaField.nullable,
       toGraphql_NamedType(schemaField.type)
     ),
-    arguments: schemaField.args?.map((arg) => {
-      return {
-        kind: graphql.Kind.INPUT_VALUE_DEFINITION,
-        name: { kind: graphql.Kind.NAME, value: arg.name },
-        type: nullableIf(arg.nullable, toGraphql_NamedType(arg.type)),
-        description: toGraphql_Description(arg.description),
-      };
-    }),
+    arguments: schemaField.args?.map((arg) => ({
+      kind: graphql.Kind.INPUT_VALUE_DEFINITION,
+      name: { kind: graphql.Kind.NAME, value: arg.name },
+      type: nullableIf(arg.nullable, toGraphql_NamedType(arg.type)),
+      description: toGraphql_Description(arg.description),
+    })),
     description: toGraphql_Description(schemaField.description),
   };
 }
@@ -119,10 +117,7 @@ function toGraphql_from_Schema_Record(
     name: { kind: graphql.Kind.NAME, value: schema.name },
     fields: schema.fields.map(toGraphql_from_Schema_Record_Field),
     description: toGraphql_Description(schema.description),
-    interfaces: schema.implements?.map((ref) => ({
-      kind: graphql.Kind.NAMED_TYPE,
-      name: { kind: graphql.Kind.NAME, value: ref.ref },
-    })),
+    interfaces: schema.implements?.map(toGraphql_NamedType),
   };
 }
 
