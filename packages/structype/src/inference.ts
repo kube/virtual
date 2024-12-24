@@ -80,6 +80,10 @@ export type Infer_Schema<
   ? S["name"]
   : S extends Schema_Record
   ? Infer_RecordSchema<S, Root>
+  : S extends Schema_Primitive
+  ? Infer_Primitive<S>
+  : S extends Schema_Array
+  ? Infer_Array<S, Root>
   : never;
 
 //

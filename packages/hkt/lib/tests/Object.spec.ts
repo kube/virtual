@@ -27,7 +27,7 @@ import { Object } from "../Object";
   // GIVEN
   type Input = [
     ["a", { firstName: "John"; lastName: "Doe" }],
-    ["b", { firstName: "Jane"; lastName: "Doe" }],
+    ["b", { firstName: "Jane"; lastName: "Doe" }]
   ];
 
   // WHEN
@@ -37,6 +37,30 @@ import { Object } from "../Object";
   type Expected = {
     a: { firstName: "John"; lastName: "Doe" };
     b: { firstName: "Jane"; lastName: "Doe" };
+  };
+  Assert<IsExactType<Result, Expected>>();
+}
+
+// Test: FilterProperties
+{
+  // GIVEN
+  type Input = {
+    a: { firstName: "John"; lastName: "Doe" };
+    b: { firstName: "Jane"; lastName: "Doe" };
+    c: { firstName: "John"; lastName: "Smith" };
+  };
+
+  interface $Predicate extends HKT {
+    return: this["B"]["firstName"] extends "John" ? true : false;
+  }
+
+  // WHEN
+  type Result = Object.FilterProperties<Input, $Predicate>;
+
+  // THEN
+  type Expected = {
+    a: { firstName: "John"; lastName: "Doe" };
+    c: { firstName: "John"; lastName: "Smith" };
   };
   Assert<IsExactType<Result, Expected>>();
 }

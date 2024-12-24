@@ -38,6 +38,21 @@ importers:
         specifier: ^16.9.0
         version: 16.9.0
 
+  packages/virtual:
+    dependencies:
+      '@kube/hkt':
+        specifier: workspace:*
+        version: link:../hkt
+      '@kube/structype':
+        specifier: workspace:*
+        version: link:../structype
+      '@kube/structype-graphql':
+        specifier: workspace:*
+        version: link:../structype-graphql
+      graphql:
+        specifier: ^16.9.0
+        version: 16.9.0
+
 packages:
 
   '@esbuild/aix-ppc64@0.24.0':
