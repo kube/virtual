@@ -5,6 +5,7 @@
   "license": "MIT",
   "author": "Chris Feijoo",
   "scripts": {
+    "dev": "pnpm -r --stream --parallel dev",
     "build": "pnpm -r build"
   },
   "devDependencies": {
