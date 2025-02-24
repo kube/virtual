@@ -15,7 +15,6 @@
     "declarationMap": true,
     /* Bundler mode */
     "moduleResolution": "Bundler",
-    "allowImportingTsExtensions": false,
     "resolveJsonModule": true,
     "isolatedModules": true,
     "jsx": "react-jsx",
