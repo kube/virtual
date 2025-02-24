@@ -1,0 +1,19 @@
+{
+  "name": "@kube/virtual",
+  "version": "0.0.1",
+  "author": "Chris Feijoo",
+  "license": "MIT",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest"
+  },
+  "dependencies": {
+    "@kube/structype": "workspace:*",
+    "@kube/structype-graphql": "workspace:*"
+  }
+}

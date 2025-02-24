@@ -1,0 +1,24 @@
+{
+  "name": "@kube/virtual-cli",
+  "version": "0.0.1",
+  "author": "Chris Feijoo",
+  "license": "MIT",
+  "type": "module",
+  "bin": "dist/cli.js",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest"
+  },
+  "dependencies": {
+    "@commander-js/extra-typings": "^13.1.0",
+    "@graphql-tools/merge": "^9.0.20",
+    "@kube/structype": "workspace:*",
+    "@kube/structype-graphql": "workspace:*",
+    "graphql": "^16.9.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20"
+  }
+}
