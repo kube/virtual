@@ -24,6 +24,7 @@ const BASE_CUBE_TRANSFORMS = Matrix.scale(60)
 const SPRING_PARAMS: SpringOptions = { stiffness: 38, damping: 9 };
 
 type LogoProps = {
+  ref?: React.Ref<SVGSVGElement>;
   className?: string;
   width?: number;
 };
