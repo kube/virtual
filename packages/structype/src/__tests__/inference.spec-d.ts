@@ -1,9 +1,9 @@
 import { Assert, IsExactType } from "typebolt";
+import { test } from "vitest";
 import { Schema_Index } from "../Schema";
 import { Infer_FromIndex } from "../inference";
 
-// Simple type
-{
+test("Simple type", () => {
   // GIVEN
   const schema = {
     _structype: "index",
@@ -30,10 +30,9 @@ import { Infer_FromIndex } from "../inference";
     seats: number;
   };
   Assert<IsExactType<Restaurant, Expected>>();
-}
+});
 
-// Type with nullable fields
-{
+test("Type with nullable fields", () => {
   const schema = {
     _structype: "index",
     types: {
@@ -44,7 +43,11 @@ import { Infer_FromIndex } from "../inference";
           { name: "id", type: { _structype: "string" } },
           { name: "name", type: { _structype: "string" } },
           { name: "seats", type: { _structype: "number" } },
-          { name: "description", nullable: true, type: { _structype: "string" } },
+          {
+            name: "description",
+            nullable: true,
+            type: { _structype: "string" },
+          },
         ],
       },
     },
@@ -60,10 +63,9 @@ import { Infer_FromIndex } from "../inference";
   };
 
   Assert<IsExactType<Restaurant, Expected>>();
-}
+});
 
-// Type with named references
-{
+test("Type with named references", () => {
   const schema = {
     _structype: "index",
     types: {
@@ -90,8 +92,14 @@ import { Infer_FromIndex } from "../inference";
         name: "Reservation",
         fields: [
           { name: "id", type: { _structype: "string" } },
-          { name: "restaurant", type: { _structype: "ref_named", ref: "Restaurant" } },
-          { name: "customer", type: { _structype: "ref_named", ref: "Customer" } },
+          {
+            name: "restaurant",
+            type: { _structype: "ref_named", ref: "Restaurant" },
+          },
+          {
+            name: "customer",
+            type: { _structype: "ref_named", ref: "Customer" },
+          },
           { name: "date", type: { _structype: "string" } },
         ],
       },
@@ -116,10 +124,9 @@ import { Infer_FromIndex } from "../inference";
   };
 
   Assert<IsExactType<Reservation, Expected>>();
-}
+});
 
-// Circular type
-{
+test("Circular type", () => {
   const schema = {
     _structype: "index",
     types: {
@@ -142,4 +149,4 @@ import { Infer_FromIndex } from "../inference";
   };
 
   Assert<IsExactType<Person, Expected>>();
-}
+});
