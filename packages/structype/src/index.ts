@@ -1,2 +1,3 @@
-export * from "./inference";
-export * from "./Schema";
+export * from "./inference.js";
+export * from "./Schema.js";
+export * from "./serialize.js";

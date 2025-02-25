@@ -1,9 +1,21 @@
 import { Schema_Index } from "./Schema";
 
-export function serialize(schema: Schema_Index): string {
+type OutputFormat = "json" | "ts";
+
+export function serialize(
+  schema: Schema_Index,
+  format: OutputFormat = "json"
+): string {
   // For now this only serializes Schema_Index with no thunk ref.
   // (as this would imply handling circular references, not handled by JSON.stringify)
   //
   // In the future, serializer will have a real implementation.
-  return JSON.stringify(schema);
+
+  if (format === "ts") {
+    return `import type { Schema_Index } from "@kube/structype";
+
+export default ${JSON.stringify(schema, null, 2)} satisfies Schema_Index;\n`;
+  }
+
+  return JSON.stringify(schema, null, 2);
 }

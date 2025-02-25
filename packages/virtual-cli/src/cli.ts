@@ -3,6 +3,7 @@ import { mergeTypeDefs } from "@graphql-tools/merge";
 import { toStructype } from "@kube/structype-graphql";
 import { print } from "graphql";
 
+import { serialize } from "@kube/structype";
 import { readFileSync, watchFile, writeFileSync } from "fs";
 
 program.name("vgql").description("Virtual CLI").version("0.0.1");
@@ -20,7 +21,7 @@ program
         );
         const mergedSchema = print(mergeTypeDefs(filesContent));
         const structype = toStructype(mergedSchema);
-        const serialized = JSON.stringify(structype, null, 2);
+        const serialized = serialize(structype, "ts");
 
         writeFileSync(options.out, serialized, "utf-8");
         console.log(
