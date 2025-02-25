@@ -61,6 +61,13 @@ function toStructype_from_TypeNode(node: graphql.TypeNode) {
   }
 }
 
+function toStructype_from_Scalar(node: graphql.ScalarTypeDefinitionNode) {
+  return {
+    _structype: "scalar",
+    name: node.name.value,
+  } as const;
+}
+
 function toStructype_from_ListType(node: graphql.ListTypeNode): Schema_Array {
   const nullableItems = node.type.kind !== "NonNullType";
   const typeNode = nullableItems ? node.type : node.type.type;
@@ -214,6 +221,9 @@ export function toStructype(gqlContent: string): Schema_Index {
 
       case "InputObjectTypeDefinition":
         return toStructype_from_InputObjectTypeDefinition(node);
+
+      case "ScalarTypeDefinition":
+        return toStructype_from_Scalar(node);
 
       default:
         throw new Error(`Unsupported kind: ${node.kind}`);

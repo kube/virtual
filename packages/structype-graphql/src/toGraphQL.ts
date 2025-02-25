@@ -196,7 +196,15 @@ export function toGraphQL(schema: Schema_Index): graphql.DocumentNode {
         case "input":
           return toGraphql_from_Schema_Input(type);
 
+        case "scalar":
+          return {
+            kind: Kind.SCALAR_TYPE_DEFINITION,
+            name: toGraphql_Name(type.name),
+            description: toGraphql_Description(type.description),
+          };
+
         default:
+          // @ts-expect-error type._structype is never
           throw new Error(`Unsupported type: ${type._structype}`);
       }
     }),

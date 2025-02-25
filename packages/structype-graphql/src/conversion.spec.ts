@@ -445,6 +445,35 @@ const CASES = [
       },
     },
   ],
+  [
+    "supports scalar",
+    gql(`
+      scalar Date
+
+      type Person {
+        birthdate: Date!
+      }
+    `),
+    {
+      _structype: "index",
+      types: {
+        Date: {
+          _structype: "scalar",
+          name: "Date",
+        },
+        Person: {
+          _structype: "record",
+          name: "Person",
+          fields: [
+            {
+              name: "birthdate",
+              type: { _structype: "ref_named", ref: "Date" },
+            },
+          ],
+        },
+      },
+    },
+  ],
 ] as const satisfies [string, string, Schema_Index][];
 
 describe.each(CASES)("%s", (title, graphqlSchema, structypeSchema) => {
