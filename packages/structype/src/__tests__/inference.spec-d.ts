@@ -1,5 +1,5 @@
 import { Assert, IsExactType } from "typebolt";
-import { test } from "vitest";
+import { describe, test } from "vitest";
 import { Schema_Index } from "../Schema";
 import { Infer_FromIndex } from "../inference";
 
@@ -149,4 +149,225 @@ test("Circular type", () => {
   };
 
   Assert<IsExactType<Person, Expected>>();
+});
+
+describe("Scalar Mapping", () => {
+  describe("when requesting Scalar directly", () => {
+    // GIVEN
+    const schema = {
+      _structype: "index",
+      types: {
+        DateTime: {
+          _structype: "scalar",
+          name: "DateTime",
+        },
+      },
+    } as const satisfies Schema_Index;
+
+    test("when no mapping", () => {
+      // GIVEN
+      type Scalars = {};
+
+      // WHEN
+      type DateTime = Infer_FromIndex<typeof schema, "DateTime", {}, Scalars>;
+
+      // THEN
+      type Expected = any;
+      Assert<IsExactType<DateTime, Expected>>();
+    });
+
+    test("when mapping is provided", () => {
+      // GIVEN
+      type Scalars = {
+        DateTime: Date;
+      };
+
+      // WHEN
+      type DateTime = Infer_FromIndex<typeof schema, "DateTime", {}, Scalars>;
+
+      // THEN
+      type Expected = Date;
+      Assert<IsExactType<DateTime, Expected>>();
+    });
+  });
+
+  test("when Scalar is nested in Record", () => {
+    // GIVEN
+    const schema = {
+      _structype: "index",
+      types: {
+        DateTime: {
+          _structype: "scalar",
+          name: "DateTime",
+        },
+        Restaurant: {
+          _structype: "record",
+          name: "Restaurant",
+          fields: [
+            { name: "id", type: { _structype: "string" } },
+            { name: "name", type: { _structype: "string" } },
+            {
+              name: "createdAt",
+              type: { _structype: "ref_named", ref: "DateTime" },
+            },
+          ],
+        },
+      },
+    } as const satisfies Schema_Index;
+
+    test("when no mapping", () => {
+      // GIVEN
+      type Scalars = {};
+
+      // WHEN
+      type Restaurant = Infer_FromIndex<
+        typeof schema,
+        "Restaurant",
+        {},
+        Scalars
+      >;
+
+      // THEN
+      type Expected = {
+        id: string;
+        name: string;
+        createdAt: any;
+      };
+      Assert<IsExactType<Restaurant, Expected>>();
+    });
+
+    test("when mapping is provided", () => {
+      // GIVEN
+      type Scalars = {
+        DateTime: Date;
+      };
+
+      // WHEN
+      type Restaurant = Infer_FromIndex<
+        typeof schema,
+        "Restaurant",
+        {},
+        Scalars
+      >;
+
+      // THEN
+      type Expected = {
+        id: string;
+        name: string;
+        createdAt: Date;
+      };
+      Assert<IsExactType<Restaurant, Expected>>();
+    });
+  });
+});
+
+describe("Type Mapping", () => {
+  describe("when requesting type directly", () => {
+    // GIVEN
+    const schema = {
+      _structype: "index",
+      types: {
+        Restaurant: {
+          _structype: "record",
+          name: "Restaurant",
+          fields: [
+            { name: "id", type: { _structype: "string" } },
+            { name: "name", type: { _structype: "string" } },
+          ],
+        },
+      },
+    } as const satisfies Schema_Index;
+
+    test("when no mapping", () => {
+      // GIVEN
+      type Types = {};
+
+      // WHEN
+      type Restaurant = Infer_FromIndex<typeof schema, "Restaurant", Types>;
+
+      // THEN
+      type Expected = {
+        id: string;
+        name: string;
+      };
+      Assert<IsExactType<Restaurant, Expected>>();
+    });
+
+    test("when mapping is provided", () => {
+      // GIVEN
+      type Types = {
+        Restaurant: "SOME_CUSTOM_TYPE";
+      };
+
+      // WHEN
+      type Restaurant = Infer_FromIndex<typeof schema, "Restaurant", Types>;
+
+      // THEN
+      type Expected = Types["Restaurant"];
+      Assert<IsExactType<Restaurant, Expected>>();
+    });
+  });
+
+  describe("when type is nested in Record", () => {
+    // GIVEN
+    const schema = {
+      _structype: "index",
+      types: {
+        User: {
+          _structype: "record",
+          name: "User",
+          fields: [
+            { name: "id", type: { _structype: "string" } },
+            { name: "name", type: { _structype: "string" } },
+          ],
+        },
+        Restaurant: {
+          _structype: "record",
+          name: "Restaurant",
+          fields: [
+            { name: "id", type: { _structype: "string" } },
+            { name: "name", type: { _structype: "string" } },
+            {
+              name: "owner",
+              type: { _structype: "ref_named", ref: "User" },
+            },
+          ],
+        },
+      },
+    } as const satisfies Schema_Index;
+
+    test("when no mapping", () => {
+      // GIVEN
+      type Types = {};
+
+      // WHEN
+      type Restaurant = Infer_FromIndex<typeof schema, "Restaurant", Types>;
+
+      // THEN
+      type Expected = {
+        id: string;
+        name: string;
+        owner: any;
+      };
+      Assert<IsExactType<Restaurant, Expected>>();
+    });
+
+    test("when mapping is provided", () => {
+      // GIVEN
+      type Types = {
+        User: "SOME_CUSTOM_TYPE";
+      };
+
+      // WHEN
+      type Restaurant = Infer_FromIndex<typeof schema, "Restaurant", Types>;
+
+      // THEN
+      type Expected = {
+        id: string;
+        name: string;
+        owner: "SOME_CUSTOM_TYPE";
+      };
+      Assert<IsExactType<Restaurant, Expected>>();
+    });
+  });
 });
