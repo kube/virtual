@@ -1,6 +1,7 @@
 import {
   Schema_Array,
   Schema_Enum,
+  Schema_ID,
   Schema_Index,
   Schema_Input,
   Schema_Interface,
@@ -79,6 +80,7 @@ export type Infer_Array<
 
 export type Infer_Schema<
   S extends
+    | Schema_ID
     | Schema_Primitive
     | Schema_Literal
     | Schema_Record
@@ -99,6 +101,12 @@ export type Infer_Schema<
   ? S["name"] extends infer Name extends keyof TypeMapping
     ? TypeMapping[Name]
     : Infer_RecordSchema<S, Root, TypeMapping, ScalarMapping>
+  : S extends Schema_Array
+  ? Infer_Array<S, Root>
+  : S extends Schema_Reference_Named
+  ? Infer_Reference_Named<S, Root, TypeMapping, ScalarMapping>
+  : S extends Schema_Primitive
+  ? Infer_Primitive<S>
   : never;
 
 //
