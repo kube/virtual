@@ -8,7 +8,8 @@ import {
 export default [
   layout("routes/main.tsx", [
     index("routes/home.tsx"),
-    route("/graphiql", "routes/graphiql.tsx"),
+    route("/state", "routes/state.tsx"),
     route("/schema", "routes/schema.tsx"),
+    route("/graphiql", "routes/graphiql.tsx"),
   ]),
 ] satisfies RouteConfig;

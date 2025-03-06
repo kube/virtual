@@ -25,6 +25,9 @@ export default function Home({}: Route.ComponentProps) {
             <TabsTrigger value="home" onClick={() => navigate("/")}>
               Home
             </TabsTrigger>
+            <TabsTrigger value="state" onClick={() => navigate("/state")}>
+              State
+            </TabsTrigger>
             <TabsTrigger value="account" onClick={() => navigate("/schema")}>
               Schema
             </TabsTrigger>
