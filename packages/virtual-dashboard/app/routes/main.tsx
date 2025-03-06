@@ -1,4 +1,4 @@
-import { Outlet, useNavigate } from "react-router";
+import { Link, Outlet, useLocation } from "react-router";
 import { Logo } from "~/components/Logo";
 import { Switch } from "~/components/ui/switch";
 import { Tabs, TabsList, TabsTrigger } from "~/components/ui/tabs";
@@ -8,9 +8,32 @@ export function meta({}: Route.MetaArgs) {
   return [{ title: "Virtual Dashboard" }];
 }
 
-export default function Home({}: Route.ComponentProps) {
-  const navigate = useNavigate();
+function NavTabs() {
+  const { pathname } = useLocation();
 
+  const tabs = [
+    { label: "Home", to: "/" },
+    { label: "State", to: "/state" },
+    { label: "Schema", to: "/schema" },
+    { label: "GraphiQL", to: "/graphiql" },
+  ];
+
+  return (
+    <Tabs value={pathname}>
+      <TabsList>
+        {tabs.map((tab) => {
+          return (
+            <Link key={tab.to} to={tab.to}>
+              <TabsTrigger value={tab.to}>{tab.label}</TabsTrigger>
+            </Link>
+          );
+        })}
+      </TabsList>
+    </Tabs>
+  );
+}
+
+export default function Home({}: Route.ComponentProps) {
   return (
     <div className="h-full flex flex-col">
       <div className="bg-gray-800 text-white p-4 flex items-center justify-between">
@@ -20,22 +43,7 @@ export default function Home({}: Route.ComponentProps) {
           <Switch />
         </div>
 
-        <Tabs defaultValue="account">
-          <TabsList>
-            <TabsTrigger value="home" onClick={() => navigate("/")}>
-              Home
-            </TabsTrigger>
-            <TabsTrigger value="state" onClick={() => navigate("/state")}>
-              State
-            </TabsTrigger>
-            <TabsTrigger value="account" onClick={() => navigate("/schema")}>
-              Schema
-            </TabsTrigger>
-            <TabsTrigger value="password" onClick={() => navigate("/graphiql")}>
-              GraphiQL
-            </TabsTrigger>
-          </TabsList>
-        </Tabs>
+        <NavTabs />
       </div>
 
       <div className="flex flex-1">
