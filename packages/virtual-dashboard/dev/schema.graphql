@@ -1,0 +1,5 @@
+type Query {
+  hello: String!
+  world: Int!
+  claire: String!
+}

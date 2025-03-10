@@ -16,7 +16,7 @@ app.use(viteDevServer.middlewares);
 
 app.use(async (req, res, next) => {
   try {
-    const source = await viteDevServer.ssrLoadModule("./server/app.ts");
+    const source = await viteDevServer.ssrLoadModule("./dev/app.ts");
     return await source.app(req, res, next);
   } catch (error) {
     if (typeof error === "object" && error instanceof Error) {

@@ -86,6 +86,9 @@ importers:
       '@kube/structype-graphql':
         specifier: workspace:*
         version: link:../structype-graphql
+      '@kube/virtual':
+        specifier: workspace:*
+        version: link:../virtual
       '@radix-ui/react-slot':
         specifier: ^1.1.2
         version: 1.1.2(@types/react@19.0.7)(react@19.0.0)
@@ -101,6 +104,9 @@ importers:
       '@react-router/serve':
         specifier: ^7.2.0
         version: 7.2.0(react-router@7.2.0(react-dom@19.0.0(react@19.0.0))(react@19.0.0))(typescript@5.7.3)
+      chokidar:
+        specifier: ^4.0.3
+        version: 4.0.3
       class-variance-authority:
         specifier: ^0.7.1
         version: 0.7.1
@@ -134,6 +140,9 @@ importers:
       react-router:
         specifier: ^7.2.0
         version: 7.2.0(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
+      remix-utils:
+        specifier: ^8.2.0
+        version: 8.2.0(react-router@7.2.0(react-dom@19.0.0(react@19.0.0))(react@19.0.0))(react@19.0.0)
       tailwind-merge:
         specifier: ^2.6.0
         version: 2.6.0
@@ -3154,6 +3163,33 @@ packages:
   regenerator-runtime@0.14.1:
     resolution: {integrity: sha512-dYnhHh0nJoMfnkZs6GmmhFknAGRrLznOu5nc9ML+EJxGvrx6H7teuevqVqCuPcPK//3eDrrjQhehXVx9cnkGdw==}
 
+  remix-utils@8.2.0:
+    resolution: {integrity: sha512-RdQI2hzLAeVCbDRtKkLAUW+fMjsNEb2yBkGY5AtCcaYpWPG08Qf3JlWxWdoMze5qgejhZEZ7407iZ6JRZgFfqg==}
+    engines: {node: '>=20.0.0'}
+    peerDependencies:
+      '@oslojs/crypto': ^1.0.1
+      '@oslojs/encoding': ^1.1.0
+      intl-parse-accept-language: ^1.0.0
+      is-ip: ^5.0.1
+      react: ^18.0.0 || ^19.0.0
+      react-router: ^7.0.0
+      zod: ^3.22.4
+    peerDependenciesMeta:
+      '@oslojs/crypto':
+        optional: true
+      '@oslojs/encoding':
+        optional: true
+      intl-parse-accept-language:
+        optional: true
+      is-ip:
+        optional: true
+      react:
+        optional: true
+      react-router:
+        optional: true
+      zod:
+        optional: true
+
   require-like@0.1.2:
     resolution: {integrity: sha512-oyrU88skkMtDdauHDuKVrgR+zuItqr6/c//FXzvmxRGMexSDc6hNvJInGW3LL46n+8b50RykrvwSUIIQH2LQ5A==}
 
@@ -3409,6 +3445,10 @@ packages:
 
   turbo-stream@2.4.0:
     resolution: {integrity: sha512-FHncC10WpBd2eOmGwpmQsWLDoK4cqsA/UT/GqNoaKOQnT8uzhtCbg3EoUDMvqpOSAI0S26mr0rkjzbOO6S3v1g==}
+
+  type-fest@4.37.0:
+    resolution: {integrity: sha512-S/5/0kFftkq27FPNye0XM1e2NsnoD/3FS+pBmbjmmtLT6I+i344KoOf7pvXreaFsDamWeaJX55nczA1m5PsBDg==}
+    engines: {node: '>=16'}
 
   type-is@1.6.18:
     resolution: {integrity: sha512-TkRKr9sUTxEH8MdfuCSP7VizJyzRNMjj2J2do2Jr3Kym598JVdEksuzPQCnlFPW4ky9Q+iA+ma9BGm06XQBy8g==}
@@ -6716,6 +6756,13 @@ snapshots:
 
   regenerator-runtime@0.14.1: {}
 
+  remix-utils@8.2.0(react-router@7.2.0(react-dom@19.0.0(react@19.0.0))(react@19.0.0))(react@19.0.0):
+    dependencies:
+      type-fest: 4.37.0
+    optionalDependencies:
+      react: 19.0.0
+      react-router: 7.2.0(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
+
   require-like@0.1.2: {}
 
   resolve-from@4.0.0: {}
@@ -7001,6 +7048,8 @@ snapshots:
   tslib@2.8.1: {}
 
   turbo-stream@2.4.0: {}
+
+  type-fest@4.37.0: {}
 
   type-is@1.6.18:
     dependencies:

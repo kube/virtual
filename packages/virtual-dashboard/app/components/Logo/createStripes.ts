@@ -1,4 +1,4 @@
-import { Vector, Matrix } from "@kube/math";
+import { Matrix, Vector } from "@kube/math";
 
 export function createCubeStripes(
   STRIPES_COUNT = 3,
@@ -32,9 +32,9 @@ export function createCubeStripes(
     [1.0, 0.0, 0.5],
   ]
     .map(([angleX, angleY, angleZ]) => {
-      const transformMatrix = Matrix.rotationX(Math.PI * angleX)
-        .dot(Matrix.rotationY(Math.PI * angleY))
-        .dot(Matrix.rotationZ(Math.PI * angleZ));
+      const transformMatrix = Matrix.rotationX(Math.PI * angleX!)
+        .dot(Matrix.rotationY(Math.PI * angleY!))
+        .dot(Matrix.rotationZ(Math.PI * angleZ!));
 
       return FACE_STRIPES.map((face) =>
         face.map((_) => _.multiplyByMatrix(transformMatrix))

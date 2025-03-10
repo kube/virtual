@@ -23,7 +23,10 @@ export function createVirtualInstance({ schema }: Options): RequestListener {
     const loadContext: build.LoadContext = {
       virtualAPI: {
         schema,
-        callback: (message) => console.log("Message from Dashboard", message),
+        send: (message) => console.log("Message from Dashboard", message),
+        listen: (_callback) => {
+          return () => console.log("Disposing listener");
+        },
       },
     };
 

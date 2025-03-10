@@ -21,13 +21,13 @@ function round(x: number) {
 export function facePath(face: Face) {
   return face
     .map(([_x, _y], i) => {
-      const x = round(_x);
-      const y = round(_y);
+      const x = round(_x!);
+      const y = round(_y!);
       if (i === 0) {
         return `M${x},${y}`;
-      } else if (x === face[i - 1][0]) {
+      } else if (x === face[i - 1]![0]) {
         return `V${y}`;
-      } else if (y === face[i - 1][1]) {
+      } else if (y === face[i - 1]![1]) {
         return `H${x}`;
       } else {
         return `L${x},${y}`;

@@ -12,9 +12,7 @@ function NavTabs() {
   const { pathname } = useLocation();
 
   const tabs = [
-    { label: "Home", to: "/" },
-    { label: "State", to: "/state" },
-    { label: "Schema", to: "/schema" },
+    { label: "State", to: "/" },
     { label: "GraphiQL", to: "/graphiql" },
   ];
 
@@ -36,8 +34,8 @@ function NavTabs() {
 export default function Home({}: Route.ComponentProps) {
   return (
     <div className="h-full flex flex-col">
-      <div className="bg-gray-800 text-white p-4 flex items-center justify-between">
-        <div className="flex items-center gap-2">
+      <div className="bg-gray-800 text-white p-1.5 flex items-center justify-between">
+        <div className="flex items-center gap-2 ml-1">
           <Logo className="w-6 fill-white" />
           <h1>virtual</h1>
           <Switch />
