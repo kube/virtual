@@ -1,15 +1,9 @@
 import type { Schema_Index } from "@kube/structype";
-import { useState } from "react";
-import { useEventSource } from "remix-utils/sse/react";
+import { use, useState } from "react";
 import { Button } from "~/components/ui/button";
-import { MonacoProvider } from "~/contexts/Monaco";
+import { VirtualContext } from "~/contexts/Virtual";
 import { MonacoEditor } from "~/lib/MonacoEditor";
 import { useConfigMonaco } from "~/lib/useConfigMonaco";
-import type { Route } from "./+types/state";
-
-export function loader({ context }: Route.LoaderArgs) {
-  return context.virtualAPI;
-}
 
 type StateEditorProps = {
   schema: Schema_Index;
@@ -46,16 +40,12 @@ function StateEditor({ schema }: StateEditorProps) {
   );
 }
 
-export default function StateView({ loaderData }: Route.ComponentProps) {
-  const schemaRaw = useEventSource("/api", { event: "schema_update" });
-
-  const schema = schemaRaw ? JSON.parse(schemaRaw) : loaderData.schema;
+export default function StateView() {
+  const { schema } = use(VirtualContext);
 
   return (
     <div className="h-full w-full flex flex-col">
-      <MonacoProvider>
-        <StateEditor schema={schema} />
-      </MonacoProvider>
+      <StateEditor schema={schema} />
     </div>
   );
 }

@@ -1,5 +1,8 @@
 import type { Schema_Index } from "@kube/structype";
 
+// This function loads loads definition from @kube/virtual packages and necessary dependencies.
+// It does resolution at build-time, to make it as easy as possible to use the React component in other apps.
+
 export async function loadVirtualLibsIntoMonaco(
   monaco: typeof import("monaco-editor"),
   rootPath: string,
