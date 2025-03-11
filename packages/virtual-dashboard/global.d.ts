@@ -1,5 +1,5 @@
+import type { VirtualServerAPI } from "@kube/virtual";
 import "react-router";
-import type { VirtualServerAPI } from "types/VirtualServerAPI.js";
 
 declare module "react-router" {
   interface AppLoadContext {

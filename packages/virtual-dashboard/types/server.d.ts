@@ -1,5 +1,5 @@
+import type { VirtualServerAPI } from "@kube/virtual";
 import { ServerBuild } from "react-router";
-import type { VirtualServerAPI } from "./VirtualServerAPI";
 
 export type LoadContext = {
   virtualAPI: VirtualServerAPI;

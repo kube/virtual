@@ -1,4 +1,4 @@
-import type { Schema_Index } from "@kube/structype";
+import { Schema_Index } from "@kube/structype";
 
 type Disposer = () => void;
 
