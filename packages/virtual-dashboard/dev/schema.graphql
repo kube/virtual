@@ -1,4 +1,30 @@
+scalar DateTime
+
+type A {
+  a: Int!
+}
+
+type B {
+  b: String!
+}
+
+type C {
+  c: Boolean!
+}
+
+union Something = A | B | C
+
+type User {
+  firstName: String!
+  lastName: String!
+  createdAt: DateTime!
+}
+
 type Query {
   hello: String!
   world: Int!
+  claire: String!
+  something: Something!
+  somethingElse: Boolean!
+  user: User!
 }

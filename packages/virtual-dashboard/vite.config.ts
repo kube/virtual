@@ -1,4 +1,5 @@
 import { toStructype } from "@kube/structype-graphql";
+import { createVirtualServer } from "@kube/virtual";
 import tailwindcss from "@tailwindcss/vite";
 import react from "@vitejs/plugin-react";
 import chokidar from "chokidar";
@@ -16,34 +17,23 @@ const devVirtualAPIPlugin = async (): Promise<Plugin> => {
     return fs.readFile(schemaPath, "utf-8").then(toStructype);
   }
 
-  let currentSchema = await getAndCompileSchema();
+  const schema = await getAndCompileSchema();
+  const virtualServer = createVirtualServer({ schema });
+
+  chokidar.watch(schemaPath).on("change", async () => {
+    const schema = await getAndCompileSchema();
+    virtualServer.setSchema(schema);
+  });
 
   return {
     name: "dev-virtual-api",
-    transformIndexHtml(html) {
-      return html.replace(
-        "</head>",
-        `<script language="javascript">
-          window.__VIRTUAL_SCHEMA = ${JSON.stringify(currentSchema)}
-          </script>
-        </head>`
-      );
-    },
     async configureServer(server) {
-      chokidar.watch(schemaPath).on("change", async () => {
-        const newSchema = await getAndCompileSchema();
-        currentSchema = newSchema;
-        server.ws.send({
-          type: "custom",
-          event: "virtual-server-api",
-          data: newSchema,
-        });
-      });
+      server.middlewares.use(virtualServer.createRequestHandler());
     },
   };
 };
 
-export default defineConfig(({ mode }) => ({
+export default defineConfig({
   server: {
     port: 1342,
     watch: {
@@ -67,4 +57,4 @@ export default defineConfig(({ mode }) => ({
     devVirtualAPIPlugin(),
     dtsPlugin(), // TODO: Make DTS Bundle
   ],
-}));
+});

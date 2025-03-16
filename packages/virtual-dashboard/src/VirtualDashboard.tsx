@@ -1,7 +1,7 @@
-import type { VirtualServerAPI } from "@kube/virtual";
+import type { VirtualServer } from "@kube/virtual";
 import { createMemoryRouter, RouterProvider } from "react-router";
 import { MonacoProvider } from "~/contexts/Monaco";
-import { VirtualContext } from "~/contexts/Virtual";
+import { VirtualServerProvider } from "~/contexts/Virtual";
 import GraphiqlView from "~/routes/graphiql";
 
 import Home from "~/routes/main";
@@ -26,17 +26,17 @@ const router = createMemoryRouter([
 ]);
 
 type VirtualDashboardProps = {
-  virtualAPI: VirtualServerAPI;
+  virtualServer: VirtualServer;
 };
 
 export const VirtualDashboard: React.FC<VirtualDashboardProps> = ({
-  virtualAPI,
+  virtualServer,
 }) => {
   return (
     <MonacoProvider>
-      <VirtualContext.Provider value={virtualAPI}>
+      <VirtualServerProvider virtualServer={virtualServer}>
         <RouterProvider router={router} />
-      </VirtualContext.Provider>
+      </VirtualServerProvider>
     </MonacoProvider>
   );
 };

@@ -1,7 +1,7 @@
 import { Schema_Index } from "@kube/structype";
 import { test } from "vitest";
 
-import { ResolversFromSchemaIndex } from "./ResolversFromSchemaIndex";
+import type { ResolversFromSchemaIndex } from "./ResolversFromSchemaIndex";
 
 test("First test", () => {
   // GIVEN

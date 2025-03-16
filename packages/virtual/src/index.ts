@@ -1,2 +1,2 @@
 export type { ResolversFromSchemaIndex } from "./ResolversFromSchemaIndex";
-export type { VirtualServerAPI } from "./VirtualServerAPI";
+export { createVirtualServer, type VirtualServer } from "./VirtualServer.js";

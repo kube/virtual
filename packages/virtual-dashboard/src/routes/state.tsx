@@ -1,7 +1,7 @@
 import type { Schema_Index } from "@kube/structype";
-import { use, useState } from "react";
+import { useState } from "react";
 import { Button } from "~/components/ui/button";
-import { VirtualContext } from "~/contexts/Virtual";
+import { useVirtualServer } from "~/contexts/Virtual";
 import { MonacoEditor } from "~/lib/MonacoEditor";
 import { useConfigMonaco } from "~/lib/useConfigMonaco";
 
@@ -41,7 +41,7 @@ function StateEditor({ schema }: StateEditorProps) {
 }
 
 export default function StateView() {
-  const { schema } = use(VirtualContext);
+  const { schema } = useVirtualServer();
 
   return (
     <div className="h-full w-full flex flex-col">
