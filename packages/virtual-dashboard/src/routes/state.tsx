@@ -31,10 +31,7 @@ function StateEditor({}: StateEditorProps) {
     : undefined;
 
   const onSave = useProxyCallback(() => {
-    console.log("REQUESTING SAVE");
-    console.log({ currentStateFilePath, stateFileModel });
     if (currentStateFilePath && stateFileModel) {
-      console.log("SAVE STATE FILE", currentStateFilePath);
       virtualServer.updateStateFile({
         path: currentStateFilePath,
         content: stateFileModel.getValue(),

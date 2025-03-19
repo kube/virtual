@@ -23,7 +23,6 @@ const devVirtualAPIPlugin = async (): Promise<Plugin> => {
     schema,
     api: {
       createStateFile: async (file: { path: string; content: string }) => {
-        console.log("API CREATE STATE FILE", file);
         await fs.writeFile(stateFilesPath + file.path, file.content);
         virtualServer.createdStateFile(file);
       },

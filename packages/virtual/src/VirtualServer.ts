@@ -172,11 +172,8 @@ export function createVirtualServer(props: VirtualServerArgs): VirtualServer {
           form.parse(req, async (_err, fields, _files) => {
             res.setHeader("Content-Type", "application/json");
             const operation = fields.operation as any as string;
-
-            console.log("EMIT:API", operation, fields);
             switch (operation) {
               case "statefile_create": {
-                console.log("EMIT:API CREATE STATE FILE", fields);
                 const path = fields.path as any as string;
                 const content = fields.content as any as string;
                 createStateFile({ path, content });
@@ -281,7 +278,6 @@ createVirtualServer.fromHttpServer = async function fromHttpServer(
   };
 
   const createStateFile: VirtualServer["createdStateFile"] = async (file) => {
-    console.log("API CREATE STATE FILE", file);
     await fetch(`${url}_virtual/emit`, {
       method: "POST",
       headers: {
