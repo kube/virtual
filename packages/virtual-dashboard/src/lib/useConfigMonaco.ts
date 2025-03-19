@@ -43,7 +43,12 @@ export function useConfigMonaco(virtualServer: VirtualServerRemote) {
     const model = monaco.editor.getModel(uri);
 
     if (model) {
-      model.setValue(stateFile.content);
+      if (model.getValue() === stateFile.content) return;
+      model.pushEditOperations(
+        [],
+        [{ range: model.getFullModelRange(), text: stateFile.content }],
+        () => null
+      );
     } else {
       const model = monaco.editor.createModel(
         stateFile.content,
