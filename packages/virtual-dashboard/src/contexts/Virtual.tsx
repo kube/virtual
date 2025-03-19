@@ -1,16 +1,16 @@
-import type { Schema_Index } from "@kube/structype";
-import type { VirtualServer } from "@kube/virtual";
+import type { VirtualServerRemote } from "@kube/virtual";
 import { createContext, useContext, useEffect, useState } from "react";
 
 type VirtualServerContext = {
-  schema: Schema_Index;
-  virtualServer: VirtualServer;
+  schema: VirtualServerRemote["schema"];
+  stateFiles: VirtualServerRemote["stateFiles"];
+  virtualServer: VirtualServerRemote;
 };
 
 const VirtualContext = createContext<VirtualServerContext>({} as any);
 
 type VirtualServerProviderProps = React.PropsWithChildren<{
-  virtualServer: VirtualServer;
+  virtualServer: VirtualServerRemote;
 }>;
 
 export const VirtualServerProvider: React.FC<VirtualServerProviderProps> = ({
@@ -18,6 +18,7 @@ export const VirtualServerProvider: React.FC<VirtualServerProviderProps> = ({
   children,
 }) => {
   const [schema, setSchema] = useState(virtualServer.schema);
+  const [stateFiles, _setStateFiles] = useState(virtualServer.stateFiles);
 
   useEffect(
     () =>
@@ -35,7 +36,7 @@ export const VirtualServerProvider: React.FC<VirtualServerProviderProps> = ({
   );
 
   return (
-    <VirtualContext.Provider value={{ schema, virtualServer }}>
+    <VirtualContext.Provider value={{ schema, stateFiles, virtualServer }}>
       {children}
     </VirtualContext.Provider>
   );

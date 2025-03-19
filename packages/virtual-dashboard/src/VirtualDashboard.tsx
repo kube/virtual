@@ -1,4 +1,4 @@
-import type { VirtualServer } from "@kube/virtual";
+import type { VirtualServerRemote } from "@kube/virtual";
 import { createMemoryRouter, RouterProvider } from "react-router";
 import { MonacoProvider } from "~/contexts/Monaco";
 import { VirtualServerProvider } from "~/contexts/Virtual";
@@ -26,7 +26,7 @@ const router = createMemoryRouter([
 ]);
 
 type VirtualDashboardProps = {
-  virtualServer: VirtualServer;
+  virtualServer: VirtualServerRemote;
 };
 
 export const VirtualDashboard: React.FC<VirtualDashboardProps> = ({

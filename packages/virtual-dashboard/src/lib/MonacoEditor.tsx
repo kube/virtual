@@ -5,11 +5,13 @@ import { MonacoContext } from "~/contexts/Monaco";
 type MonacoEditorProps = {
   className?: string;
   model?: editor.IModel;
+  onSave: () => void;
 };
 
 export const MonacoEditor: React.FC<MonacoEditorProps> = ({
   className,
   model,
+  onSave,
 }) => {
   const monaco = useContext(MonacoContext);
   const editorRef = useRef<HTMLDivElement>(null);
@@ -26,6 +28,8 @@ export const MonacoEditor: React.FC<MonacoEditorProps> = ({
       padding: { top: 13, bottom: 13 },
       minimap: { enabled: false },
     });
+
+    editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyS, onSave);
 
     setEditor(editor);
 

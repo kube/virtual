@@ -2,76 +2,93 @@ import { use, useEffect, useState } from "react";
 import { MonacoContext } from "~/contexts/Monaco";
 import { loadVirtualLibsIntoMonaco } from "./loadVirtualDts";
 
-import type { Schema_Index } from "@kube/structype";
+import type { VirtualServerRemote } from "@kube/virtual";
 import type { editor } from "monaco-editor";
+import { useVirtualServer } from "~/contexts/Virtual";
 
-export function useConfigMonaco(schema: Schema_Index) {
+const FILE_ROOT_PATH = "inmemory://_virtual/";
+const STATE_FILES_ROOT_PATH = "inmemory://_virtual/states/";
+
+export function useConfigMonaco(virtualServer: VirtualServerRemote) {
+  const { schema } = useVirtualServer();
   const monaco = use(MonacoContext);
-  const [models, setModels] = useState<editor.IModel[]>([]);
 
-  useEffect(() => {
-    if (!monaco) return;
+  type StateFilesMap = Record<string, editor.ITextModel | undefined>;
+  const [stateFilesMap, setStateFilesMap] = useState<StateFilesMap>({});
 
-    const model1 = monaco.editor.createModel(
-      [
-        `export default VirtualState({`,
-        `  Query: {`,
-        `    hello: () => "Hello!",`,
-        `    world: () => 42,`,
-        `  }`,
-        `})`,
-      ].join("\n"),
-      "typescript",
-      monaco.Uri.parse("inmemory://model/model1.ts")
+  function getStateFileUri(stateFile: { path: string }) {
+    if (!monaco) throw new Error("Monaco not loaded");
+    return monaco.Uri.parse(STATE_FILES_ROOT_PATH + stateFile.path);
+  }
+
+  function getStateFileModel(stateFile: { path: string }) {
+    if (!monaco) throw new Error("Monaco not loaded");
+    const uri = getStateFileUri(stateFile);
+    return monaco.editor.getModel(uri);
+  }
+
+  function disposeModel(stateFile: { path: string }) {
+    setStateFilesMap((prev) =>
+      Object.fromEntries(
+        Object.entries(prev).filter(([uri]) => uri !== stateFile.path)
+      )
     );
+    getStateFileModel(stateFile)?.dispose();
+  }
 
-    const model2 = monaco.editor.createModel(
-      [
-        `export default VirtualState({`,
-        `  Query: {`,
-        `    hello: () => "Hello!",`,
-        `    world: () => 42,`,
-        `  }`,
-        `})`,
-      ].join("\n"),
-      "typescript",
-      monaco.Uri.parse("inmemory://model/model2.ts")
-    );
+  function createOrUpdateModel(stateFile: { path: string; content: string }) {
+    if (!monaco) throw new Error("Monaco not loaded");
 
-    setModels([model1, model2]);
+    const uri = getStateFileUri(stateFile);
+    const model = monaco.editor.getModel(uri);
 
-    return () => {
-      model1.dispose();
-      model2.dispose();
-    };
-  }, [monaco]);
+    if (model) {
+      model.setValue(stateFile.content);
+    } else {
+      const model = monaco.editor.createModel(
+        stateFile.content,
+        "typescript",
+        uri
+      );
+      setStateFilesMap((prev) => ({
+        ...prev,
+        [stateFile.path]: model,
+      }));
+    }
+  }
 
+  // Update TypeScript libs when schema changes
   useEffect(() => {
-    if (!monaco) return;
-
-    // validation settings
-    monaco.languages.typescript.typescriptDefaults.setDiagnosticsOptions({
-      noSemanticValidation: false,
-      noSyntaxValidation: false,
-    });
-
-    // compiler options
-    monaco.languages.typescript.typescriptDefaults.setCompilerOptions({
-      target: monaco.languages.typescript.ScriptTarget.ES2015,
-      allowNonTsExtensions: true,
-    });
-
-    const fileRootPath = "inmemory://model/";
-
-    loadVirtualLibsIntoMonaco(monaco, fileRootPath, schema);
-
-    monaco.languages.typescript.typescriptDefaults.setCompilerOptions({
-      ...monaco.languages.typescript.typescriptDefaults.getCompilerOptions(),
-      moduleResolution: monaco.languages.typescript.ModuleResolutionKind.NodeJs,
-      allowSyntheticDefaultImports: true,
-      rootDir: fileRootPath,
-    });
+    if (monaco) loadVirtualLibsIntoMonaco(monaco, FILE_ROOT_PATH, schema);
   }, [monaco, schema]);
 
-  return { models };
+  useEffect(() => {
+    if (!monaco) return;
+
+    // Create model for initial state files
+    virtualServer.stateFiles.forEach(createOrUpdateModel);
+
+    // Watch for schema/state file changes and update models/libs
+    const disposeWatcher = virtualServer.addEventListener((event) => {
+      switch (event.type) {
+        case "statefile_updated":
+        case "statefile_created": {
+          createOrUpdateModel(event.payload);
+          break;
+        }
+        case "statefile_deleted": {
+          disposeModel(event.payload);
+          break;
+        }
+      }
+    });
+
+    // Dispose watcher and models on unmount
+    return () => {
+      disposeWatcher();
+      virtualServer.stateFiles.forEach(disposeModel);
+    };
+  }, [monaco, virtualServer]);
+
+  return { stateFilesMap };
 }

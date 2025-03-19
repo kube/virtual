@@ -23,7 +23,6 @@ type User {
 type Query {
   hello: String!
   world: Int!
-  claire: String!
   something: Something!
   somethingElse: Boolean!
   user: User!

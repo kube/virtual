@@ -1,2 +1,6 @@
 export type { ResolversFromSchemaIndex } from "./ResolversFromSchemaIndex";
-export { createVirtualServer, type VirtualServer } from "./VirtualServer.js";
+export {
+  createVirtualServer,
+  type VirtualServer,
+  type VirtualServerRemote,
+} from "./VirtualServer.js";
