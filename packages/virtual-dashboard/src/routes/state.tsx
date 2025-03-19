@@ -20,21 +20,21 @@ export function useProxyCallback(fn: Function) {
 type StateEditorProps = {};
 
 function StateEditor({}: StateEditorProps) {
-  const { virtualServer, stateFiles } = useVirtualServer();
+  const { virtualServer } = useVirtualServer();
   const { stateFilesMap } = useConfigMonaco(virtualServer);
 
   const [currentStateFilePath, setCurrentStateFilePath] = useState(
-    stateFiles[0]?.path
+    stateFilesMap[0]?.stateFile.path
   );
-  const stateFileModel = currentStateFilePath
+  const currentStateFile = currentStateFilePath
     ? stateFilesMap[currentStateFilePath]
     : undefined;
 
   const onSave = useProxyCallback(() => {
-    if (currentStateFilePath && stateFileModel) {
+    if (currentStateFile) {
       virtualServer.updateStateFile({
-        path: currentStateFilePath,
-        content: stateFileModel.getValue(),
+        path: currentStateFile.stateFile.path,
+        content: currentStateFile.model.getValue(),
       });
     }
   });
@@ -49,9 +49,14 @@ function StateEditor({}: StateEditorProps) {
             onClick={() => setCurrentStateFilePath(path)}
           >
             {path.toString().replace("inmemory://_virtual/states/", "")}
-            {currentStateFilePath === path && (
+            {currentStateFile?.stateFile.path === path && (
               <div className="w-4 flex justify-center">
-                <div className="rounded-4xl w-2 h-2 bg-slate-400" />
+                <div
+                  className={[
+                    "rounded-4xl w-2 h-2",
+                    currentStateFile.isDirty ? "bg-red-600" : "bg-slate-400",
+                  ].join(" ")}
+                />
               </div>
             )}
           </Button>
@@ -70,7 +75,7 @@ function StateEditor({}: StateEditorProps) {
       <div className="w-full grow">
         <MonacoEditor
           className="h-full w-full"
-          model={stateFileModel ?? undefined}
+          model={currentStateFile?.model}
           onSave={onSave}
         />
       </div>

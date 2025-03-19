@@ -13,7 +13,15 @@ export function useConfigMonaco(virtualServer: VirtualServerRemote) {
   const { schema } = useVirtualServer();
   const monaco = use(MonacoContext);
 
-  type StateFilesMap = Record<string, editor.ITextModel | undefined>;
+  type StateFilesMap = Record<
+    string,
+    | {
+        isDirty: boolean;
+        stateFile: { path: string; content: string };
+        model: editor.ITextModel;
+      }
+    | undefined
+  >;
   const [stateFilesMap, setStateFilesMap] = useState<StateFilesMap>({});
 
   function getStateFileUri(stateFile: { path: string }) {
@@ -43,21 +51,34 @@ export function useConfigMonaco(virtualServer: VirtualServerRemote) {
     const model = monaco.editor.getModel(uri);
 
     if (model) {
-      if (model.getValue() === stateFile.content) return;
       model.pushEditOperations(
         [],
         [{ range: model.getFullModelRange(), text: stateFile.content }],
         () => null
       );
+      setStateFilesMap((prev) => ({
+        ...prev,
+        [stateFile.path]: { isDirty: false, stateFile, model },
+      }));
     } else {
       const model = monaco.editor.createModel(
         stateFile.content,
         "typescript",
         uri
       );
+      model.onDidChangeContent(() => {
+        setStateFilesMap((prev) => ({
+          ...prev,
+          [stateFile.path]: {
+            isDirty: model.getValue() !== stateFile.content,
+            stateFile,
+            model,
+          },
+        }));
+      });
       setStateFilesMap((prev) => ({
         ...prev,
-        [stateFile.path]: model,
+        [stateFile.path]: { isDirty: false, stateFile, model },
       }));
     }
   }
