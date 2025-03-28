@@ -60,13 +60,28 @@ type InitialState = {
   stateFiles: VirtualStateFile[];
 };
 
+function mergeDeepResolvers(...resolvers: any[]) {
+  const merged: any = {};
+  for (const resolver of resolvers) {
+    for (const key in resolver) {
+      if (key in merged) {
+        merged[key] = { ...merged[key], ...resolver[key] };
+      } else {
+        merged[key] = resolver[key];
+      }
+    }
+  }
+  return merged;
+}
+
 export function createVirtualServer(props: VirtualServerArgs): VirtualServer {
   let schema = props.schema;
 
+  let compiledVirtualState: any;
   let defaultResolvers = createDefaultResolvers(schema);
   let executableSchema = makeExecutableSchema({
     typeDefs: toGraphqlSchema(schema),
-    resolvers: defaultResolvers,
+    resolvers: mergeDeepResolvers(defaultResolvers, compiledVirtualState),
   });
 
   let stateFiles: VirtualStateFile[] = [];
@@ -79,12 +94,27 @@ export function createVirtualServer(props: VirtualServerArgs): VirtualServer {
     }
   }
 
+  async function compileState(state: VirtualStateFile) {
+    const moduleUrl = `data:text/javascript,${encodeURIComponent(`
+      function VirtualState(x) { return x; }
+      ${state.content}
+    `)}`;
+    const module = await import(moduleUrl);
+
+    compiledVirtualState = module.default;
+
+    executableSchema = makeExecutableSchema({
+      typeDefs: toGraphqlSchema(schema),
+      resolvers: mergeDeepResolvers(defaultResolvers, compiledVirtualState),
+    });
+  }
+
   const setSchema: VirtualServer["setSchema"] = (newSchema) => {
     schema = newSchema;
     defaultResolvers = createDefaultResolvers(schema);
     executableSchema = makeExecutableSchema({
       typeDefs: toGraphqlSchema(schema),
-      resolvers: defaultResolvers,
+      resolvers: mergeDeepResolvers(defaultResolvers, compiledVirtualState),
     });
     dispatch({ type: "schema_updated", payload: schema });
   };
@@ -125,6 +155,7 @@ export function createVirtualServer(props: VirtualServerArgs): VirtualServer {
       throw new Error(`File not found: ${file.path}`);
     }
     stateFiles[index] = file;
+    compileState(file);
     dispatch({ type: "statefile_updated", payload: file });
   };
 
