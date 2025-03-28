@@ -6,6 +6,7 @@ import GraphiqlView from "~/routes/graphiql";
 
 import Home from "~/routes/main";
 import StateView from "~/routes/state";
+import SplitView from "./routes/split";
 
 const router = createMemoryRouter([
   {
@@ -20,6 +21,10 @@ const router = createMemoryRouter([
       {
         path: "/graphiql",
         Component: GraphiqlView,
+      },
+      {
+        path: "/split",
+        Component: SplitView,
       },
     ],
   },

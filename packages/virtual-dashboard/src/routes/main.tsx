@@ -10,6 +10,7 @@ function NavTabs() {
   const tabs = [
     { label: "State", to: "/" },
     { label: "GraphiQL", to: "/graphiql" },
+    { label: "Split", to: "/split" },
   ];
 
   return (
