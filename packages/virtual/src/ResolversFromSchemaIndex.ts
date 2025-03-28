@@ -12,16 +12,18 @@ type ResolverFromSchema<
   ScalarMapping extends { [K in keyof S["types"]]?: any } = {}
 > = S["types"][TypeName] extends Schema_Record
   ? {
-      [K in S["types"][TypeName]["fields"][number]["name"]]: (
+      [K in S["types"][TypeName]["fields"][number]["name"]]?: (
         parent: Infer_FromIndex<S, TypeName, TypeMapping, ScalarMapping>,
         args: any,
         context: any
-      ) => Infer_Schema<
-        // TODO: Create helper to simplify this complex inline expression
-        (S["types"][TypeName]["fields"][number] & { name: K })["type"],
-        S,
-        TypeMapping,
-        ScalarMapping
+      ) => Partial<
+        Infer_Schema<
+          // TODO: Create helper to simplify this complex inline expression
+          (S["types"][TypeName]["fields"][number] & { name: K })["type"],
+          S,
+          TypeMapping,
+          ScalarMapping
+        >
       >;
     }
   : never;

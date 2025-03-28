@@ -1,9 +1,9 @@
 import { Schema_Index } from "@kube/structype";
-import { test } from "vitest";
+import { describe, test } from "vitest";
 
 import type { ResolversFromSchemaIndex } from "./ResolversFromSchemaIndex";
 
-test("First test", () => {
+describe("First test", () => {
   // GIVEN
   const schema = {
     _structype: "index",
@@ -27,12 +27,24 @@ test("First test", () => {
   // WHEN
   type Resolvers = ResolversFromSchemaIndex<typeof schema, Mapping>;
 
-  // THEN
-  const _x: Resolvers = {
-    Restaurant: {
-      id: () => "4242",
-      name: () => "Hello",
-      seats: () => 4242,
-    },
-  };
+  test("works", () => {
+    // THEN
+    const _x: Resolvers = {
+      Restaurant: {
+        id: () => "4242",
+        name: () => "Hello",
+        seats: () => 4242,
+      },
+    };
+  });
+
+  test("can be partial", () => {
+    // THEN
+    const _x: Resolvers = {
+      Restaurant: {
+        id: () => "4242",
+        name: () => "Hello",
+      },
+    };
+  });
 });
