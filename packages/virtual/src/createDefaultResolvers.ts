@@ -90,7 +90,18 @@ function createDefaultResolvers_Record(index: Schema_Index, name: string) {
       if (field.nullable) {
         return [field.name, () => null];
       }
-      return [field.name, () => getDefaultValueForSchema(field.type, index)];
+      return [
+        field.name,
+        (obj: any) => {
+          // If field value is present is provided by parent object, use it
+          if (obj && field.name in obj) {
+            return obj[field.name];
+          } else {
+            // Otherwise, return default value for field type
+            return getDefaultValueForSchema(field.type, index);
+          }
+        },
+      ];
     })
   );
 }

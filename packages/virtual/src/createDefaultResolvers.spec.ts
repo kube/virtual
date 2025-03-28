@@ -59,3 +59,37 @@ test("createDefaultResolvers", async ({ expect }) => {
   expect(resolvers.User.computer_brand()).toBe("Apple");
   expect(resolvers.User.somethingElse()).toBe(null);
 });
+
+test("when parent object is provided, it should be used", async ({
+  expect,
+}) => {
+  const schema = {
+    _structype: "index",
+    types: {
+      User: {
+        _structype: "record",
+        name: "User",
+        fields: [
+          {
+            name: "id",
+            type: { _structype: "id" },
+          },
+          {
+            name: "name",
+            type: { _structype: "string" },
+          },
+        ],
+      },
+    },
+  } satisfies Schema_Index;
+
+  const resolvers = createDefaultResolvers(schema);
+
+  const parent = {
+    id: "1234",
+    name: "John Doe",
+  };
+
+  expect(resolvers.User.id(parent)).toBe("1234");
+  expect(resolvers.User.name(parent)).toBe("John Doe");
+});
