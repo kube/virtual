@@ -11,60 +11,60 @@ import tsconfigPaths from "vite-tsconfig-paths";
 // A little plugin for development to simulate
 // a VirtualServer and CLI with watchers etc...
 const devVirtualAPIPlugin = async (): Promise<Plugin> => {
-  const schemaPath = "../../__dev/schema.graphql";
-  const stateFilesPath = "../../__dev/states/";
-
-  function getAndCompileSchema() {
-    return fs.readFile(schemaPath, "utf-8").then(toStructype);
-  }
-
-  const schema = await getAndCompileSchema();
-  const virtualServer = createVirtualServer({
-    schema,
-    api: {
-      createStateFile: async (file: { path: string; content: string }) => {
-        await fs.writeFile(stateFilesPath + file.path, file.content);
-        virtualServer.createdStateFile(file);
-      },
-      deleteStateFile: async (file: { path: string }) => {
-        await fs.unlink(stateFilesPath + file.path);
-        virtualServer.deletedStateFile(file.path);
-      },
-      updateStateFile: async (file: { path: string; content: string }) => {
-        await fs.writeFile(stateFilesPath + file.path, file.content);
-        virtualServer.updatedStateFile(file);
-      },
-    },
-  });
-
-  chokidar.watch(schemaPath).on("change", async () => {
-    const schema = await getAndCompileSchema();
-    virtualServer.setSchema(schema);
-  });
-
-  chokidar.watch(stateFilesPath).on("all", async (event, realPath) => {
-    const path = realPath.replace(stateFilesPath, "");
-    switch (event) {
-      case "add": {
-        const content = await fs.readFile(realPath, "utf-8");
-        virtualServer.createdStateFile({ path, content });
-        break;
-      }
-      case "unlink": {
-        virtualServer.deletedStateFile(path);
-        break;
-      }
-      case "change": {
-        const content = await fs.readFile(realPath, "utf-8");
-        virtualServer.updatedStateFile({ path, content });
-        break;
-      }
-    }
-  });
-
   return {
     name: "dev-virtual-api",
     async configureServer(server) {
+      const schemaPath = "../../__dev/schema.graphql";
+      const stateFilesPath = "../../__dev/states/";
+
+      function getAndCompileSchema() {
+        return fs.readFile(schemaPath, "utf-8").then(toStructype);
+      }
+
+      const schema = await getAndCompileSchema();
+      const virtualServer = createVirtualServer({
+        schema,
+        api: {
+          createStateFile: async (file: { path: string; content: string }) => {
+            await fs.writeFile(stateFilesPath + file.path, file.content);
+            virtualServer.createdStateFile(file);
+          },
+          deleteStateFile: async (file: { path: string }) => {
+            await fs.unlink(stateFilesPath + file.path);
+            virtualServer.deletedStateFile(file.path);
+          },
+          updateStateFile: async (file: { path: string; content: string }) => {
+            await fs.writeFile(stateFilesPath + file.path, file.content);
+            virtualServer.updatedStateFile(file);
+          },
+        },
+      });
+
+      chokidar.watch(schemaPath).on("change", async () => {
+        const schema = await getAndCompileSchema();
+        virtualServer.setSchema(schema);
+      });
+
+      chokidar.watch(stateFilesPath).on("all", async (event, realPath) => {
+        const path = realPath.replace(stateFilesPath, "");
+        switch (event) {
+          case "add": {
+            const content = await fs.readFile(realPath, "utf-8");
+            virtualServer.createdStateFile({ path, content });
+            break;
+          }
+          case "unlink": {
+            virtualServer.deletedStateFile(path);
+            break;
+          }
+          case "change": {
+            const content = await fs.readFile(realPath, "utf-8");
+            virtualServer.updatedStateFile({ path, content });
+            break;
+          }
+        }
+      });
+
       server.middlewares.use(virtualServer.createRequestHandler());
     },
   };
@@ -83,12 +83,18 @@ export default defineConfig({
     rollupOptions: {
       external: ["react", "react-dom"],
     },
+    cssMinify: true,
+  },
+  css: {
+    postcss: {
+      plugins: [tailwindcss],
+    },
   },
   plugins: [
     tailwindcss(),
     react(),
     tsconfigPaths(),
+    dtsPlugin({ rollupTypes: true }),
     devVirtualAPIPlugin(),
-    dtsPlugin(), // TODO: Make DTS Bundle
   ],
 });
