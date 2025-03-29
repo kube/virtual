@@ -1,7 +1,7 @@
 import { createVirtualServer, type VirtualServerRemote } from "@kube/virtual";
 import { StrictMode, useEffect, useState } from "react";
 import { createRoot } from "react-dom/client";
-import { VirtualDashboard } from "../src";
+import { VirtualDashboard } from "..";
 
 const root = createRoot(document.getElementById("root")!);
 

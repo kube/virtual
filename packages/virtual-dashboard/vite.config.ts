@@ -73,9 +73,6 @@ const devVirtualAPIPlugin = async (): Promise<Plugin> => {
 export default defineConfig({
   server: {
     port: 1342,
-    watch: {
-      ignored: ["dev/schema.graphql", "dev/states/*"],
-    },
   },
   build: {
     lib: {
