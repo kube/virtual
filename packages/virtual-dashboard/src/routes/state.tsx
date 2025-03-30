@@ -1,4 +1,4 @@
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { Button } from "~/components/ui/button";
 import { useVirtualServer } from "~/contexts/Virtual";
 import { MonacoEditor } from "~/lib/MonacoEditor";
@@ -23,12 +23,18 @@ function StateEditor({}: StateEditorProps) {
   const { virtualServer } = useVirtualServer();
   const { stateFilesMap } = useConfigMonaco(virtualServer);
 
-  const [currentStateFilePath, setCurrentStateFilePath] = useState(
-    stateFilesMap[0]?.stateFile.path
-  );
+  const [currentStateFilePath, setCurrentStateFilePath] = useState<string>();
   const currentStateFile = currentStateFilePath
     ? stateFilesMap[currentStateFilePath]
     : undefined;
+
+  useEffect(() => {
+    // If no currentStateFilePath, or not in the stateFilesMap, set to first one, or undefined if none
+    if (!currentStateFilePath || !stateFilesMap[currentStateFilePath]) {
+      const firstStateFile = Object.values(stateFilesMap)[0];
+      setCurrentStateFilePath(firstStateFile?.stateFile.path);
+    }
+  }, [currentStateFilePath, stateFilesMap]);
 
   const onSave = useProxyCallback(() => {
     if (currentStateFile) {
