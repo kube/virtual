@@ -1,6 +1,5 @@
 import { Link, Outlet, useLocation } from "react-router";
 import { Logo } from "~/components/Logo";
-import { Switch } from "~/components/ui/switch";
 import { Tabs, TabsList, TabsTrigger } from "~/components/ui/tabs";
 import "../app.css";
 
@@ -35,7 +34,6 @@ export default function Home() {
         <div className="flex items-center gap-2 ml-1">
           <Logo className="w-6 fill-white" />
           <h1>virtual</h1>
-          <Switch />
         </div>
 
         <NavTabs />
