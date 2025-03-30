@@ -81,14 +81,20 @@ export default defineConfig({
       formats: ["es"],
     },
     rollupOptions: {
-      external: ["react", "react-dom"],
+      external: [
+        "react",
+        "react-dom",
+        "react/jsx-runtime",
+        "monaco-editor",
+        "monaco-editor/esm/vs/editor/editor.worker?worker",
+        "monaco-editor/esm/vs/language/json/json.worker?worker",
+        "monaco-editor/esm/vs/language/typescript/ts.worker?worker",
+        "graphql",
+        "graphiql",
+        "graphiql/graphiql.css",
+      ],
     },
     cssMinify: true,
-  },
-  css: {
-    postcss: {
-      plugins: [tailwindcss],
-    },
   },
   plugins: [
     tailwindcss(),

@@ -30,7 +30,7 @@ function NavTabs() {
 
 export default function Home() {
   return (
-    <div className="virtualDashboardRoot h-full flex flex-col">
+    <div className="virtualDashboardRoot h-full w-full flex flex-col">
       <div className="bg-gray-800 text-white p-1.5 flex items-center justify-between">
         <div className="flex items-center gap-2 ml-1">
           <Logo className="w-6 fill-white" />
