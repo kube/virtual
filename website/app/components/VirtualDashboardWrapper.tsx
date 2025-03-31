@@ -1,5 +1,4 @@
 import virtualDashboardStyles from "@kube/virtual-dashboard/style.css?raw";
-import graphiqlStylesUrl from "graphiql/graphiql.min.css?url";
 import monacoEditorStylesUrl from "monaco-editor/min/vs/editor/editor.main.css?url";
 import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
@@ -10,11 +9,11 @@ function useForceRender() {
 }
 
 /**
- * ShadowDOM wrapper for VirtualDashboard styles.
+ * Wrapper for ShadowDOM VirtualDashboard and Monaco Editor styles.
  */
-export const VirtualDashboardWrapper: React.FC<React.PropsWithChildren> = ({
-  children,
-}) => {
+export const VirtualDashboardWrapper: React.FC<
+  React.PropsWithChildren<{ className?: string }>
+> = ({ children, className }) => {
   const wrapperRef = useRef<HTMLDivElement>(null);
   const shadowRootRef = useRef<ShadowRoot>(null);
   const forceRender = useForceRender();
@@ -30,12 +29,6 @@ export const VirtualDashboardWrapper: React.FC<React.PropsWithChildren> = ({
       style.innerText = virtualDashboardStyles;
       shadow.appendChild(style);
 
-      // Inject GraphiQL styles
-      const graphiqlStylesLink = document.createElement("link");
-      graphiqlStylesLink.rel = "stylesheet";
-      graphiqlStylesLink.href = graphiqlStylesUrl;
-      shadow.appendChild(graphiqlStylesLink);
-
       // Inject Monaco editor styles
       const monacoStyles = document.createElement("style");
       monacoStyles.innerText = `@import "${monacoEditorStylesUrl}";`;
@@ -47,10 +40,7 @@ export const VirtualDashboardWrapper: React.FC<React.PropsWithChildren> = ({
   }, []);
 
   return (
-    <div
-      ref={wrapperRef}
-      className="flex top-0 left-0 right-0 bottom-0 absolute"
-    >
+    <div ref={wrapperRef} className={className}>
       {shadowRootRef.current && createPortal(children, shadowRootRef.current)}
     </div>
   );

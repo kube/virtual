@@ -1,21 +1,8 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Button } from "~/components/ui/button";
 import { useVirtualServer } from "~/contexts/Virtual";
 import { MonacoEditor } from "~/lib/MonacoEditor";
 import { useConfigMonaco } from "~/lib/useConfigMonaco";
-
-//
-// TODO: Move this somewhere else
-//
-export function useProxyCallback<Fn extends (...args: never[]) => unknown>(
-  fn: Fn
-): Fn;
-
-export function useProxyCallback(fn: Function) {
-  const callbackRef = useRef<typeof fn>(fn);
-  callbackRef.current = fn;
-  return useCallback((...args: any[]) => callbackRef.current(...args), []);
-}
 
 type StateEditorProps = {};
 
@@ -36,14 +23,14 @@ function StateEditor({}: StateEditorProps) {
     }
   }, [currentStateFilePath, stateFilesMap]);
 
-  const onSave = useProxyCallback(() => {
+  const onSave = useCallback(() => {
     if (currentStateFile) {
       virtualServer.updateStateFile({
         path: currentStateFile.stateFile.path,
         content: currentStateFile.model.getValue(),
       });
     }
-  });
+  }, [currentStateFile, virtualServer]);
 
   return (
     <>

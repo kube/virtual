@@ -2,6 +2,7 @@ import { toStructype } from "@kube/structype-graphql";
 import { type VirtualServer, createVirtualServer } from "@kube/virtual";
 import { VirtualDashboard } from "@kube/virtual-dashboard";
 import { useEffect, useState } from "react";
+import { DemoApp } from "~/components/DemoApp";
 import { Logo } from "~/components/Logo";
 import { VirtualDashboardWrapper } from "~/components/VirtualDashboardWrapper";
 import type { Route } from "./+types/home";
@@ -45,16 +46,25 @@ export default function Home() {
   }, []);
 
   return (
-    <div className="container h-svh mx-auto flex justify-center items-center flex-col">
-      <div className="flex gap-2">
+    <div className="container h-svh mx-auto flex justify-center items-center flex-col p-6">
+      <div className="flex gap-2 select-none">
         <Logo className="w-11" />
         <span className="text-4xl">virtual</span>
       </div>
-      <div className="mt-4 overflow-hidden rounded-md w-[80%] h-[60%] relative">
+
+      <div className="mt-4 w-full flex grow">
         {virtualServer && (
-          <VirtualDashboardWrapper>
-            <VirtualDashboard virtualServer={virtualServer} />
-          </VirtualDashboardWrapper>
+          <div className="flex flex-col grow">
+            <div className="relative grow">
+              <VirtualDashboardWrapper className="absolute h-full w-full flex grow overflow-hidden rounded-md">
+                <VirtualDashboard virtualServer={virtualServer} />
+              </VirtualDashboardWrapper>
+            </div>
+
+            <div className="flex-grow-[0.6] bg-gray-600 rounded-md mt-4 p-4">
+              <DemoApp virtualServer={virtualServer} />
+            </div>
+          </div>
         )}
       </div>
     </div>

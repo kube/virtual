@@ -8,7 +8,7 @@ type Monaco = typeof import("monaco-editor");
 
 const FILE_ROOT_PATH = "inmemory://_virtual/";
 
-export const MonacoContext = createContext<Monaco | null>(null);
+export const MonacoContext = createContext<Monaco>({} as any);
 
 export function MonacoProvider({ children }: React.PropsWithChildren) {
   const [monaco, setMonaco] = useState<Monaco>();
