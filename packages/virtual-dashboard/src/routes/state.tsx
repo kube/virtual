@@ -1,14 +1,12 @@
-import { useEffect, useState } from "react";
+import { use, useEffect, useState } from "react";
 import { Button } from "~/components/ui/button";
-import { useVirtualServer } from "~/contexts/Virtual";
+import { VirtualDashboardContext } from "~/contexts/VirtualDashboard";
 import { MonacoEditor } from "~/lib/MonacoEditor";
-import { useConfigMonaco } from "~/lib/useConfigMonaco";
 
 type StateEditorProps = {};
 
 function StateEditor({}: StateEditorProps) {
-  const { virtualServer } = useVirtualServer();
-  const { stateFilesMap } = useConfigMonaco(virtualServer);
+  const { virtualServer, stateFilesMap } = use(VirtualDashboardContext);
 
   const [currentStateFilePath, setCurrentStateFilePath] = useState<string>();
   const currentStateFile = currentStateFilePath

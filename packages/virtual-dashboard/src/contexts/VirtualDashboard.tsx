@@ -1,36 +1,49 @@
-import { use, useEffect, useState } from "react";
+import {
+  EditorContextProvider as GraphiqlEditorContextProvider,
+  SchemaContextProvider as GraphiqlSchemaContextProvider,
+} from "@graphiql/react";
+import { createContext, use, useEffect, useMemo, useState } from "react";
 import { MonacoContext } from "~/contexts/Monaco";
-import { loadVirtualLibsIntoMonaco } from "./loadVirtualDts";
+import { loadVirtualLibsIntoMonaco } from "../lib/loadVirtualLibsIntoMonaco";
 
+import { toGraphqlSchema } from "@kube/structype-graphql";
 import type { VirtualServerRemote } from "@kube/virtual";
 import type { editor } from "monaco-editor";
-import { useVirtualServer } from "~/contexts/Virtual";
+import { VirtualContext } from "~/contexts/Virtual";
 
 const FILE_ROOT_PATH = "inmemory://_virtual/";
 const STATE_FILES_ROOT_PATH = "inmemory://_virtual/states/";
 
-export function useConfigMonaco(virtualServer: VirtualServerRemote) {
-  const { schema } = useVirtualServer();
+type StateFilesMap = Record<
+  string,
+  | {
+      isDirty: boolean;
+      stateFile: { path: string; content: string };
+      model: editor.ITextModel;
+    }
+  | undefined
+>;
+
+export const VirtualDashboardContext = createContext<{
+  virtualServer: VirtualServerRemote;
+  stateFilesMap: Record<string, any>;
+}>({} as any);
+
+export const VirtualDashboardContextProvider: React.FC<
+  React.PropsWithChildren
+> = ({ children }) => {
+  const { virtualServer } = use(VirtualContext);
+
+  const { schema } = use(VirtualContext);
   const monaco = use(MonacoContext);
 
-  type StateFilesMap = Record<
-    string,
-    | {
-        isDirty: boolean;
-        stateFile: { path: string; content: string };
-        model: editor.ITextModel;
-      }
-    | undefined
-  >;
   const [stateFilesMap, setStateFilesMap] = useState<StateFilesMap>({});
 
   function getStateFileUri(stateFile: { path: string }) {
-    if (!monaco) throw new Error("Monaco not loaded");
     return monaco.Uri.parse(STATE_FILES_ROOT_PATH + stateFile.path);
   }
 
   function getStateFileModel(stateFile: { path: string }) {
-    if (!monaco) throw new Error("Monaco not loaded");
     const uri = getStateFileUri(stateFile);
     return monaco.editor.getModel(uri);
   }
@@ -45,8 +58,6 @@ export function useConfigMonaco(virtualServer: VirtualServerRemote) {
   }
 
   function createOrUpdateModel(stateFile: { path: string; content: string }) {
-    if (!monaco) throw new Error("Monaco not loaded");
-
     const uri = getStateFileUri(stateFile);
     const model = monaco.editor.getModel(uri);
 
@@ -85,7 +96,7 @@ export function useConfigMonaco(virtualServer: VirtualServerRemote) {
 
   // Update TypeScript libs when schema changes
   useEffect(() => {
-    if (monaco) loadVirtualLibsIntoMonaco(monaco, FILE_ROOT_PATH, schema);
+    loadVirtualLibsIntoMonaco(monaco, FILE_ROOT_PATH, schema);
   }, [monaco, schema]);
 
   useEffect(() => {
@@ -116,5 +127,19 @@ export function useConfigMonaco(virtualServer: VirtualServerRemote) {
     };
   }, [monaco, virtualServer]);
 
-  return { stateFilesMap };
-}
+  const graphqlSchema = useMemo(() => toGraphqlSchema(schema), [schema]);
+  const defaultQuery = `query {}`;
+
+  return (
+    <VirtualDashboardContext.Provider value={{ virtualServer, stateFilesMap }}>
+      <GraphiqlEditorContextProvider query={defaultQuery}>
+        <GraphiqlSchemaContextProvider
+          schema={graphqlSchema}
+          fetcher={({ query }) => virtualServer.resolve(query)}
+        >
+          {children}
+        </GraphiqlSchemaContextProvider>
+      </GraphiqlEditorContextProvider>
+    </VirtualDashboardContext.Provider>
+  );
+};

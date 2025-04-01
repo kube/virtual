@@ -1,25 +1,20 @@
-import {
-  EditorContextProvider,
-  SchemaContextProvider as GraphqlSchemaContextProvider,
-} from "@graphiql/react";
 import "@graphiql/react/dist/style.css";
-import { toGraphqlSchema } from "@kube/structype-graphql";
 import type { VirtualServerRemote } from "@kube/virtual";
-import { createContext, useContext, useEffect, useMemo, useState } from "react";
+import { createContext, useEffect, useState } from "react";
 
-type VirtualServerContext = {
+type VirtualContext = {
   schema: VirtualServerRemote["schema"];
   stateFiles: VirtualServerRemote["stateFiles"];
   virtualServer: VirtualServerRemote;
 };
 
-const VirtualContext = createContext<VirtualServerContext>({} as any);
+export const VirtualContext = createContext<VirtualContext>({} as any);
 
 type VirtualServerProviderProps = React.PropsWithChildren<{
   virtualServer: VirtualServerRemote;
 }>;
 
-export const VirtualServerProvider: React.FC<VirtualServerProviderProps> = ({
+export const VirtualContextProvider: React.FC<VirtualServerProviderProps> = ({
   virtualServer,
   children,
 }) => {
@@ -41,26 +36,9 @@ export const VirtualServerProvider: React.FC<VirtualServerProviderProps> = ({
     [virtualServer]
   );
 
-  const graphqlSchema = useMemo(() => toGraphqlSchema(schema), [schema]);
-
-  const defaultQuery = `query {
-  hello
-}`;
-
   return (
     <VirtualContext.Provider value={{ schema, stateFiles, virtualServer }}>
-      <EditorContextProvider query={defaultQuery}>
-        <GraphqlSchemaContextProvider
-          schema={graphqlSchema}
-          fetcher={({ query }) => virtualServer.resolve(query)}
-        >
-          {children}
-        </GraphqlSchemaContextProvider>
-      </EditorContextProvider>
+      {children}
     </VirtualContext.Provider>
   );
 };
-
-export function useVirtualServer() {
-  return useContext(VirtualContext);
-}

@@ -1,6 +1,7 @@
 import type { VirtualServerRemote } from "@kube/virtual";
 import { MonacoProvider } from "~/contexts/Monaco";
-import { VirtualServerProvider } from "~/contexts/Virtual";
+import { VirtualContextProvider } from "~/contexts/Virtual";
+import { VirtualDashboardContextProvider } from "./contexts/VirtualDashboard";
 import RootView from "./routes/root";
 
 type VirtualDashboardProps = {
@@ -12,9 +13,11 @@ export const VirtualDashboard: React.FC<VirtualDashboardProps> = ({
 }) => {
   return (
     <MonacoProvider>
-      <VirtualServerProvider virtualServer={virtualServer}>
-        <RootView />
-      </VirtualServerProvider>
+      <VirtualContextProvider virtualServer={virtualServer}>
+        <VirtualDashboardContextProvider>
+          <RootView />
+        </VirtualDashboardContextProvider>
+      </VirtualContextProvider>
     </MonacoProvider>
   );
 };

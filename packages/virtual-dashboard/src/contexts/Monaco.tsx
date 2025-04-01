@@ -11,8 +11,6 @@ export function MonacoProvider({ children }: React.PropsWithChildren) {
 
   useEffect(() => {
     import("monaco-editor").then((monaco) => {
-      setMonaco(monaco);
-
       // Link language workers
       self.MonacoEnvironment ??= {
         async getWorker(_, label) {
@@ -58,6 +56,8 @@ export function MonacoProvider({ children }: React.PropsWithChildren) {
         allowSyntheticDefaultImports: true,
         rootDir: FILE_ROOT_PATH,
       });
+
+      setMonaco(monaco);
     });
   });
 
