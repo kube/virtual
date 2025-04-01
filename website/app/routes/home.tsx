@@ -48,8 +48,8 @@ export default function Home() {
   return (
     <div className="container h-svh mx-auto flex justify-center items-center flex-col p-6">
       <div className="flex gap-2 select-none">
-        <Logo className="w-11" />
-        <span className="text-4xl">virtual</span>
+        <Logo className="w-10" />
+        <span className="text-3xl">virtual</span>
       </div>
 
       <div className="mt-4 w-full flex grow">
