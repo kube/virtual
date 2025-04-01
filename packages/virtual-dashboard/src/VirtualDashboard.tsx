@@ -1,34 +1,7 @@
 import type { VirtualServerRemote } from "@kube/virtual";
-import { createMemoryRouter, RouterProvider } from "react-router";
 import { MonacoProvider } from "~/contexts/Monaco";
 import { VirtualServerProvider } from "~/contexts/Virtual";
-import GraphiqlView from "~/routes/graphiql";
-
-import Home from "~/routes/main";
-import StateView from "~/routes/state";
-import SplitView from "./routes/split";
-
-const router = createMemoryRouter([
-  {
-    path: "/",
-    Component: Home,
-    children: [
-      {
-        path: "/",
-        index: true,
-        Component: StateView,
-      },
-      {
-        path: "/graphiql",
-        Component: GraphiqlView,
-      },
-      {
-        path: "/split",
-        Component: SplitView,
-      },
-    ],
-  },
-]);
+import RootView from "./routes/root";
 
 type VirtualDashboardProps = {
   virtualServer: VirtualServerRemote;
@@ -40,7 +13,7 @@ export const VirtualDashboard: React.FC<VirtualDashboardProps> = ({
   return (
     <MonacoProvider>
       <VirtualServerProvider virtualServer={virtualServer}>
-        <RouterProvider router={router} />
+        <RootView />
       </VirtualServerProvider>
     </MonacoProvider>
   );
