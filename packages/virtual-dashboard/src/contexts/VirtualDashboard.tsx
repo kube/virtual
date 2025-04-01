@@ -26,7 +26,9 @@ type StateFilesMap = Record<
 
 export const VirtualDashboardContext = createContext<{
   virtualServer: VirtualServerRemote;
-  stateFilesMap: Record<string, any>;
+  stateFilesMap: StateFilesMap;
+  currentStateFile: StateFilesMap[string];
+  setCurrentStateFilePath: (path: string) => void;
 }>({} as any);
 
 export const VirtualDashboardContextProvider: React.FC<
@@ -38,6 +40,18 @@ export const VirtualDashboardContextProvider: React.FC<
   const monaco = use(MonacoContext);
 
   const [stateFilesMap, setStateFilesMap] = useState<StateFilesMap>({});
+  const [currentStateFilePath, setCurrentStateFilePath] = useState<string>();
+  const currentStateFile = currentStateFilePath
+    ? stateFilesMap[currentStateFilePath]
+    : undefined;
+
+  useEffect(() => {
+    // If no currentStateFilePath, or not in the stateFilesMap, set to first one, or undefined if none
+    if (!currentStateFilePath || !stateFilesMap[currentStateFilePath]) {
+      const firstStateFile = Object.values(stateFilesMap)[0];
+      setCurrentStateFilePath(firstStateFile?.stateFile.path);
+    }
+  }, [currentStateFilePath, stateFilesMap]);
 
   function getStateFileUri(stateFile: { path: string }) {
     return monaco.Uri.parse(STATE_FILES_ROOT_PATH + stateFile.path);
@@ -131,7 +145,14 @@ export const VirtualDashboardContextProvider: React.FC<
   const defaultQuery = `query {}`;
 
   return (
-    <VirtualDashboardContext.Provider value={{ virtualServer, stateFilesMap }}>
+    <VirtualDashboardContext.Provider
+      value={{
+        virtualServer,
+        stateFilesMap,
+        currentStateFile,
+        setCurrentStateFilePath,
+      }}
+    >
       <GraphiqlEditorContextProvider query={defaultQuery}>
         <GraphiqlSchemaContextProvider
           schema={graphqlSchema}

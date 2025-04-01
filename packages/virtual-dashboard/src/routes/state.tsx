@@ -1,25 +1,11 @@
-import { use, useEffect, useState } from "react";
-import { Button } from "~/components/ui/button";
+import { use } from "react";
 import { VirtualDashboardContext } from "~/contexts/VirtualDashboard";
 import { MonacoEditor } from "~/lib/MonacoEditor";
 
 type StateEditorProps = {};
 
 function StateEditor({}: StateEditorProps) {
-  const { virtualServer, stateFilesMap } = use(VirtualDashboardContext);
-
-  const [currentStateFilePath, setCurrentStateFilePath] = useState<string>();
-  const currentStateFile = currentStateFilePath
-    ? stateFilesMap[currentStateFilePath]
-    : undefined;
-
-  useEffect(() => {
-    // If no currentStateFilePath, or not in the stateFilesMap, set to first one, or undefined if none
-    if (!currentStateFilePath || !stateFilesMap[currentStateFilePath]) {
-      const firstStateFile = Object.values(stateFilesMap)[0];
-      setCurrentStateFilePath(firstStateFile?.stateFile.path);
-    }
-  }, [currentStateFilePath, stateFilesMap]);
+  const { virtualServer, currentStateFile } = use(VirtualDashboardContext);
 
   function onSave() {
     if (currentStateFile) {
@@ -32,37 +18,6 @@ function StateEditor({}: StateEditorProps) {
 
   return (
     <>
-      <div className="grow-0 shrink-0 p-1 flex gap-1 bg-black">
-        {Object.entries(stateFilesMap).map(([path], index) => (
-          <Button
-            className="pr-2"
-            key={path}
-            onClick={() => setCurrentStateFilePath(path)}
-          >
-            {path.toString().replace("inmemory://_virtual/states/", "")}
-            {currentStateFile?.stateFile.path === path && (
-              <div className="w-4 flex justify-center">
-                <div
-                  className={[
-                    "rounded-4xl w-2 h-2",
-                    currentStateFile.isDirty ? "bg-red-600" : "bg-slate-400",
-                  ].join(" ")}
-                />
-              </div>
-            )}
-          </Button>
-        ))}
-        <Button
-          onClick={() =>
-            virtualServer.createStateFile({
-              path: "new.state.ts",
-              content: "export default VirtualState({})",
-            })
-          }
-        >
-          +
-        </Button>
-      </div>
       <div className="w-full grow">
         <MonacoEditor
           className="h-full w-full"
