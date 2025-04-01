@@ -96,7 +96,6 @@ export const Logo: React.FC<LogoProps> = ({ className, ref }) => {
       }}
     >
       <motion.path
-        style={{ fill: "var(--palette-purple)" }}
         // @ts-expect-error
         d={useTransform(projectedCubeStripes, (s) => s.map(facePath).join(" "))}
       />
