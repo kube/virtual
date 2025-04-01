@@ -2,11 +2,9 @@ import type { editor } from "monaco-editor";
 import { useCallback, useContext, useEffect, useRef, useState } from "react";
 import { MonacoContext } from "~/contexts/Monaco";
 
-export function useProxyCallback<Fn extends (...args: never[]) => unknown>(
-  fn: Fn
-): Fn;
+function useProxyCallback<Fn extends (...args: never[]) => unknown>(fn: Fn): Fn;
 
-export function useProxyCallback(fn: Function) {
+function useProxyCallback(fn: Function) {
   const callbackRef = useRef<typeof fn>(fn);
   callbackRef.current = fn;
   return useCallback((...args: any[]) => callbackRef.current(...args), []);
@@ -32,7 +30,6 @@ export const MonacoEditor: React.FC<MonacoEditorProps> = ({
   useEffect(() => {
     const editor = monaco.editor.create(editorRef.current!, {
       automaticLayout: true,
-      language: "typescript",
       theme: "vs-dark",
       padding: { top: 13, bottom: 13 },
       minimap: { enabled: false },

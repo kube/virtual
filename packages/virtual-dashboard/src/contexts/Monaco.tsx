@@ -1,7 +1,3 @@
-import editorWorker from "monaco-editor/esm/vs/editor/editor.worker?worker";
-import jsonWorker from "monaco-editor/esm/vs/language/json/json.worker?worker";
-import tsWorker from "monaco-editor/esm/vs/language/typescript/ts.worker?worker";
-
 import { createContext, useEffect, useState } from "react";
 
 type Monaco = typeof import("monaco-editor");
@@ -19,17 +15,29 @@ export function MonacoProvider({ children }: React.PropsWithChildren) {
 
       // Link language workers
       self.MonacoEnvironment ??= {
-        getWorker: function (_, label) {
+        async getWorker(_, label) {
           switch (label) {
-            case "json":
-              // Not even sure we need JSON Worker, though
-              // its weight is negligible compared TS worker
-              return new jsonWorker();
+            case "json": {
+              const JsonWorker = await import(
+                "monaco-editor/esm/vs/language/json/json.worker?worker"
+              );
+              return new JsonWorker.default();
+            }
+
             case "typescript":
-            case "javascript":
-              return new tsWorker();
-            default:
-              return new editorWorker();
+            case "javascript": {
+              const TsWorker = await import(
+                "monaco-editor/esm/vs/language/typescript/ts.worker?worker"
+              );
+              return new TsWorker.default();
+            }
+
+            default: {
+              const EditorWorker = await import(
+                "monaco-editor/esm/vs/editor/editor.worker?worker"
+              );
+              return new EditorWorker.default();
+            }
           }
         },
       };

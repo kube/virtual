@@ -17,6 +17,7 @@
     "typecheck": "tsc"
   },
   "dependencies": {
+    "@graphiql/react": "^0.28.2",
     "@kube/math": "^0.0.7",
     "@kube/structype": "workspace:*",
     "@kube/structype-graphql": "workspace:*",

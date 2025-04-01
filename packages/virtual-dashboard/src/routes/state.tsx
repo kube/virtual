@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "~/components/ui/button";
 import { useVirtualServer } from "~/contexts/Virtual";
 import { MonacoEditor } from "~/lib/MonacoEditor";
@@ -23,14 +23,14 @@ function StateEditor({}: StateEditorProps) {
     }
   }, [currentStateFilePath, stateFilesMap]);
 
-  const onSave = useCallback(() => {
+  function onSave() {
     if (currentStateFile) {
       virtualServer.updateStateFile({
         path: currentStateFile.stateFile.path,
         content: currentStateFile.model.getValue(),
       });
     }
-  }, [currentStateFile, virtualServer]);
+  }
 
   return (
     <>
