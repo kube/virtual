@@ -31,7 +31,7 @@ export const MonacoEditor: React.FC<MonacoEditorProps> = ({
     const editor = monaco.editor.create(editorRef.current!, {
       automaticLayout: true,
       theme: "vs-dark",
-      padding: { top: 13, bottom: 13 },
+      padding: { top: 12, bottom: 12 },
       minimap: { enabled: false },
       lineNumbers: "off",
       fontFamily: "DM Mono",
