@@ -34,6 +34,8 @@ export const MonacoEditor: React.FC<MonacoEditorProps> = ({
       padding: { top: 13, bottom: 13 },
       minimap: { enabled: false },
       lineNumbers: "off",
+      fontFamily: "DM Mono",
+      fontSize: 13,
       scrollbar: {
         verticalScrollbarSize: 0,
         verticalSliderSize: 0,

@@ -1,3 +1,4 @@
+import graphiqlStylesUrl from "@graphiql/react/dist/style.css?url";
 import virtualDashboardStyles from "@kube/virtual-dashboard/style.css?raw";
 import monacoEditorStylesUrl from "monaco-editor/min/vs/editor/editor.main.css?url";
 import { useEffect, useRef, useState } from "react";
@@ -33,6 +34,11 @@ export const VirtualDashboardWrapper: React.FC<
       const monacoStyles = document.createElement("style");
       monacoStyles.innerText = `@import "${monacoEditorStylesUrl}";`;
       shadow.appendChild(monacoStyles);
+
+      // Inject GraphiQL editor styles
+      const graphiqlStyles = document.createElement("style");
+      graphiqlStyles.innerText = `@import "${graphiqlStylesUrl}";`;
+      shadow.appendChild(graphiqlStyles);
 
       shadowRootRef.current = shadow;
       forceRender();
