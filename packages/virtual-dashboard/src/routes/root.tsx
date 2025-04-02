@@ -1,3 +1,4 @@
+import { GripHorizontalIcon, Maximize2Icon } from "lucide-react";
 import { use, useEffect, useRef, useState } from "react";
 import { Logo } from "~/components/Logo";
 import { Button } from "~/components/ui/button";
@@ -15,11 +16,23 @@ import "../app.css";
 import GraphiqlView from "./graphiql";
 import StateView from "./state";
 
-const Pane: React.FC<React.PropsWithChildren> = ({ children }) => {
+const Pane: React.FC<React.PropsWithChildren<{ title: string }>> = ({
+  title,
+  children,
+}) => {
   return (
     <div className="flex flex-1 h-full">
       <div className="flex flex-col w-full h-full rounded-md overflow-hidden border border-gray-700">
-        {children}
+        <div className="grow-0 shrink-0 h-6 border-b border-b-gray-700 flex py-1 px-2 text-sm select-none">
+          <div className="grow flex items-center gap-1">
+            <GripHorizontalIcon size={14} />
+            <span className="text-xs text-gray-300">{title}</span>
+          </div>
+          <div className="flex items-center gap-1">
+            <Maximize2Icon size={14} />
+          </div>
+        </div>
+        <div className="grow">{children}</div>
       </div>
     </div>
   );
@@ -109,10 +122,10 @@ export default function RootView() {
 
       <div className="flex flex-1">
         <div className="w-full flex gap-2 p-2 pt-0">
-          <Pane>
+          <Pane title="GraphQL Query">
             <GraphiqlView />
           </Pane>
-          <Pane>
+          <Pane title="State Editor">
             <StateView />
           </Pane>
         </div>
