@@ -1,6 +1,15 @@
-import { use } from "react";
+import { use, useEffect, useRef, useState } from "react";
 import { Logo } from "~/components/Logo";
 import { Button } from "~/components/ui/button";
+import {
+  CommandDialog,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+  CommandSeparator,
+} from "~/components/ui/command";
 import { VirtualDashboardContext } from "~/contexts/VirtualDashboard";
 import "../app.css";
 import GraphiqlView from "./graphiql";
@@ -24,12 +33,49 @@ export default function RootView() {
     currentStateFile,
   } = use(VirtualDashboardContext);
 
+  const rootRef = useRef<HTMLDivElement>(null);
+  const [paletteOpen, setPaletteOpen] = useState(false);
+
+  useEffect(() => {
+    function onKeyDown(event: KeyboardEvent) {
+      if (event.key === "k" && (event.ctrlKey || event.metaKey)) {
+        setPaletteOpen(true);
+      }
+    }
+    rootRef.current?.addEventListener("keydown", onKeyDown);
+    return () => rootRef.current?.removeEventListener("keydown", onKeyDown);
+  }, []);
+
   return (
-    <div className="virtualDashboardRoot h-full w-full flex flex-col bg-gray-800">
+    <div
+      ref={rootRef}
+      className="virtualDashboardRoot h-full w-full flex flex-col bg-gray-800 focus:bg-gray-900"
+      tabIndex={-1}
+    >
       <div className="text-white p-1.5 flex items-center justify-between">
         <div className="flex items-center gap-2 ml-1 opacity-70 h-7 select-none">
           <Logo className="w-6 fill-white" />
           <h1>virtual</h1>
+        </div>
+
+        <div>
+          <CommandDialog open={paletteOpen} onOpenChange={setPaletteOpen}>
+            <CommandInput placeholder="Type a command or search..." />
+            <CommandList>
+              <CommandEmpty>No results found.</CommandEmpty>
+              <CommandGroup heading="Suggestions">
+                <CommandItem>Calendar</CommandItem>
+                <CommandItem>Search Emoji</CommandItem>
+                <CommandItem>Calculator</CommandItem>
+              </CommandGroup>
+              <CommandSeparator />
+              <CommandGroup heading="Settings">
+                <CommandItem>Profile</CommandItem>
+                <CommandItem>Billing</CommandItem>
+                <CommandItem>Settings</CommandItem>
+              </CommandGroup>
+            </CommandList>
+          </CommandDialog>
         </div>
 
         <div className="flex items-center gap-1">
