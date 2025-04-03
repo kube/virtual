@@ -15,12 +15,21 @@ export const links: Route.LinksFunction = () => [
   { rel: "preconnect", href: "https://fonts.googleapis.com" },
   {
     rel: "preconnect",
+    href: "https://fonts.gstatic.com",
+    crossOrigin: "anonymous",
+  },
+  {
+    rel: "preconnect",
     href: "https://rsms.me/",
     crossOrigin: "anonymous",
   },
   {
     rel: "stylesheet",
     href: "https://rsms.me/inter/inter.css",
+  },
+  {
+    rel: "stylesheet",
+    href: "https://fonts.googleapis.com/css2?family=DM+Mono:ital,wght@0,300;0,400;0,500;1,300;1,400;1,500&display=swap",
   },
   { rel: "stylesheet", href: stylesheet },
 ];

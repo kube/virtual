@@ -16,9 +16,12 @@
     "@graphql-tools/merge": "^9.0.20",
     "@kube/structype": "workspace:*",
     "@kube/structype-graphql": "workspace:*",
+    "@kube/virtual-dashboard": "workspace:*",
+    "@react-router/node": "^7.2.0",
     "graphql": "^16.9.0"
   },
   "devDependencies": {
+    "@types/express": "^5.0.0",
     "@types/node": "^20"
   }
 }
