@@ -67,8 +67,8 @@ export default function Home() {
               </div>
             </Panel>
 
-            <PanelResizeHandle className="leading-3 text-center opacity-15">
-              •
+            <PanelResizeHandle className="flex justify-center items-center group">
+              <div className="h-1 rounded-full w-10 m-1 bg-white opacity-10 group-hover:opacity-20 transition-opacity" />
             </PanelResizeHandle>
 
             <Panel>

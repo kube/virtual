@@ -1,10 +1,10 @@
 import { QueryEditor } from "@graphiql/react";
 import { use, useRef, useState } from "react";
 import {
-  ResizableHandle,
-  ResizablePanel,
-  ResizablePanelGroup,
-} from "~/components/ui/resizable";
+  PanelResizeHandle as ResizableHandle,
+  Panel as ResizablePanel,
+  PanelGroup as ResizablePanelGroup,
+} from "react-resizable-panels";
 import { VirtualDashboardContext } from "~/contexts/VirtualDashboard";
 
 const isMac = navigator.platform.toUpperCase().indexOf("MAC") >= 0;
@@ -37,9 +37,11 @@ export default function GraphiqlView() {
         <ResizablePanel>
           <QueryEditor onEdit={(q) => (query.current = q)} />
         </ResizablePanel>
-        <ResizableHandle className="bg-[#363636]" />
+        <ResizableHandle className="py-0.5 group">
+          <div className="bg-white h-[1px] opacity-10 group-hover:opacity-20 group-active:opacity-40 transition-opacity duration-300" />
+        </ResizableHandle>
         <ResizablePanel>
-          <pre className="p-2">{JSON.stringify(result, null, 2)}</pre>
+          <pre className="p-2.5">{JSON.stringify(result, null, 2)}</pre>
         </ResizablePanel>
       </ResizablePanelGroup>
     </div>

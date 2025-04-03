@@ -1,5 +1,10 @@
 import { Maximize2Icon, Minimize2Icon } from "lucide-react";
 import { use, useEffect, useRef, useState } from "react";
+import {
+  PanelResizeHandle as ResizableHandle,
+  Panel as ResizablePanel,
+  PanelGroup as ResizablePanelGroup,
+} from "react-resizable-panels";
 import { twMerge } from "tailwind-merge";
 import { Logo } from "~/components/Logo";
 import { Button } from "~/components/ui/button";
@@ -12,11 +17,6 @@ import {
   CommandList,
   CommandSeparator,
 } from "~/components/ui/command";
-import {
-  ResizableHandle,
-  ResizablePanel,
-  ResizablePanelGroup,
-} from "~/components/ui/resizable";
 import { VirtualDashboardContext } from "~/contexts/VirtualDashboard";
 import "../app.css";
 import GraphiqlView from "./graphiql";
@@ -49,8 +49,8 @@ const PaneGroup: React.FC<React.PropsWithChildren> = ({ children }) => {
             <StateView />
           </Pane>
         </ResizablePanel>
-        <ResizableHandle className="w-1 m-0.5 rounded bg-transparent hover:bg-gray-700 active">
-          a
+        <ResizableHandle className="rounded bg-transparent py-1 px-0.5 group">
+          <div className="w-0.5 bg-white rounded-full h-full opacity-0 group-hover:opacity-15 transition-opacity group-active:opacity-30 duration-300" />
         </ResizableHandle>
         <ResizablePanel minSize={10}>
           <Pane
