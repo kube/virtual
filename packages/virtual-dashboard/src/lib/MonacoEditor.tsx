@@ -1,14 +1,7 @@
 import type { editor } from "monaco-editor";
-import { useCallback, useContext, useEffect, useRef, useState } from "react";
+import { useContext, useEffect, useRef, useState } from "react";
 import { MonacoContext } from "~/contexts/Monaco";
-
-function useProxyCallback<Fn extends (...args: never[]) => unknown>(fn: Fn): Fn;
-
-function useProxyCallback(fn: Function) {
-  const callbackRef = useRef<typeof fn>(fn);
-  callbackRef.current = fn;
-  return useCallback((...args: any[]) => callbackRef.current(...args), []);
-}
+import { useProxyCallback } from "./hooks";
 
 type MonacoEditorProps = {
   className?: string;

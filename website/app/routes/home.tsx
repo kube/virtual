@@ -2,6 +2,7 @@ import { toStructype } from "@kube/structype-graphql";
 import { type VirtualServer, createVirtualServer } from "@kube/virtual";
 import { VirtualDashboard } from "@kube/virtual-dashboard";
 import { useEffect, useState } from "react";
+import { Panel, PanelGroup, PanelResizeHandle } from "react-resizable-panels";
 import { DemoApp } from "~/components/DemoApp";
 import { Logo } from "~/components/Logo";
 import { VirtualDashboardWrapper } from "~/components/VirtualDashboardWrapper";
@@ -29,15 +30,18 @@ export default function Home() {
       api: {
         createStateFile: async (file: { path: string; content: string }) => {
           console.log("createStateFile", file);
+          server.createdStateFile(file);
         },
         deleteStateFile: async (file: { path: string }) => {
           console.log("deleteStateFile", file);
         },
         updateStateFile: async (file: { path: string; content: string }) => {
           console.log("updateStateFile", file);
+          server.createdStateFile(file);
         },
       },
     });
+
     server.createdStateFile({
       path: "hello.state.ts",
       content: `export default VirtualState({});`,
@@ -54,17 +58,25 @@ export default function Home() {
 
       <div className="mt-4 w-full flex grow">
         {virtualServer && (
-          <div className="flex flex-col grow">
-            <div className="relative grow">
-              <VirtualDashboardWrapper className="absolute h-full w-full flex grow overflow-hidden rounded-md">
-                <VirtualDashboard virtualServer={virtualServer} />
-              </VirtualDashboardWrapper>
-            </div>
+          <PanelGroup direction="vertical" className="w-full h-full">
+            <Panel>
+              <div className="relative h-full w-full">
+                <VirtualDashboardWrapper className="absolute h-full w-full flex grow overflow-hidden rounded-md">
+                  <VirtualDashboard virtualServer={virtualServer} />
+                </VirtualDashboardWrapper>
+              </div>
+            </Panel>
 
-            <div className="flex-grow-[0.6] bg-gray-600 rounded-md mt-4 p-4">
-              <DemoApp virtualServer={virtualServer} />
-            </div>
-          </div>
+            <PanelResizeHandle className="leading-3 text-center opacity-15">
+              •
+            </PanelResizeHandle>
+
+            <Panel>
+              <div className="h-full w-full bg-gray-600 rounded-md p-4">
+                <DemoApp virtualServer={virtualServer} />
+              </div>
+            </Panel>
+          </PanelGroup>
         )}
       </div>
     </div>

@@ -235,6 +235,9 @@ importers:
       react-dom:
         specifier: ^19.0.0
         version: 19.0.0(react@19.0.0)
+      react-resizable-panels:
+        specifier: ^2.1.7
+        version: 2.1.7(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
       react-router:
         specifier: ^7.1.3
         version: 7.1.3(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
