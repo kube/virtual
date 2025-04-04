@@ -1,8 +1,8 @@
-export default function Home() {
+export default function DocsPage() {
   return (
     <>
       <div className="mt-4 w-full flex items-center justify-center text-gray-500">
-        Work In Progress.
+        Docs In Progress.
       </div>
     </>
   );
