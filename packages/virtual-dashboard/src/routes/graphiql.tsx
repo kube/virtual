@@ -7,7 +7,7 @@ import {
 } from "react-resizable-panels";
 import { VirtualDashboardContext } from "~/contexts/VirtualDashboard";
 
-const isMac = navigator.platform.toUpperCase().indexOf("MAC") >= 0;
+const isMac = () => navigator.platform.toUpperCase().indexOf("MAC") >= 0;
 
 export default function GraphiqlView() {
   const { virtualServer } = use(VirtualDashboardContext);
@@ -24,7 +24,7 @@ export default function GraphiqlView() {
         "--font-family-mono": "DM Mono",
       }}
       onKeyDown={async (e) => {
-        const isModifierKeyPressed = isMac ? e.metaKey : e.ctrlKey;
+        const isModifierKeyPressed = isMac() ? e.metaKey : e.ctrlKey;
         if (isModifierKeyPressed && e.key === "Enter") {
           e.preventDefault();
           const result = await virtualServer.resolve(query.current);
