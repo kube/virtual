@@ -1,7 +1,6 @@
 import { makeExecutableSchema } from "@graphql-tools/schema";
 import { Schema_Index } from "@kube/structype";
 import { toGraphqlSchema } from "@kube/structype-graphql";
-import type { NextHandleFunction } from "connect";
 import { execute, parse } from "graphql";
 import { createDefaultResolvers } from "./createDefaultResolvers.js";
 
@@ -37,7 +36,6 @@ export type VirtualServer = {
     callback: VirtualServer_EventListener
   ) => Disposer;
   readonly resolve: (query: string) => Promise<any>;
-  readonly createRequestHandler: () => NextHandleFunction;
   readonly createStateFile: (file: VirtualStateFile) => void;
   readonly createdStateFile: (file: VirtualStateFile) => void;
   readonly updateStateFile: (file: VirtualStateFile) => void;
@@ -55,7 +53,7 @@ type VirtualServerArgs = {
   };
 };
 
-type InitialState = {
+export type InitialState = {
   schema: Schema_Index;
   stateFiles: VirtualStateFile[];
 };
@@ -168,85 +166,12 @@ export function createVirtualServer(props: VirtualServerArgs): VirtualServer {
     dispatch({ type: "statefile_deleted", payload: { path } });
   };
 
-  const createRequestHandler: VirtualServer["createRequestHandler"] = () => {
-    const formidablePromise = import("formidable").then((_) => _.default);
-
-    return async (req, res, next) => {
-      const formidable = await formidablePromise;
-
-      if (req.url !== "/_virtual" && !req.url?.startsWith("/_virtual/")) {
-        return next();
-      }
-
-      switch (req.url) {
-        case "/_virtual/initial": {
-          res.setHeader("Content-Type", "application/json");
-          const initialState: InitialState = {
-            schema,
-            stateFiles,
-          };
-          res.end(JSON.stringify(initialState));
-          break;
-        }
-        case "/_virtual/events": {
-          res.setHeader("Content-Type", "text/event-stream");
-          res.setHeader("Cache-Control", "no-cache");
-          res.setHeader("Connection", "keep-alive");
-          const dispose = addEventListener((event) => {
-            res.write(`data: ${JSON.stringify(event)}\n\n`);
-          });
-          req.on("close", dispose);
-          break;
-        }
-        case "/_virtual/emit": {
-          const form = formidable({});
-          form.parse(req, async (_err, fields, _files) => {
-            res.setHeader("Content-Type", "application/json");
-            const operation = fields.operation as any as string;
-            switch (operation) {
-              case "statefile_create": {
-                const path = fields.path as any as string;
-                const content = fields.content as any as string;
-                createStateFile({ path, content });
-                break;
-              }
-              case "statefile_update": {
-                const path = fields.path as any as string;
-                const content = fields.content as any as string;
-                updateStateFile({ path, content });
-                break;
-              }
-              case "statefile_delete": {
-                const path = fields.path as any as string;
-                deleteStateFile(path);
-                break;
-              }
-            }
-            res.end("Done");
-          });
-          break;
-        }
-        case "/_virtual/graphql": {
-          const form = formidable({});
-          form.parse(req, async (_err, fields, _files) => {
-            res.setHeader("Content-Type", "application/json");
-            const query = fields.query as any as string;
-            const result = await resolve(query);
-            res.end(JSON.stringify(result));
-          });
-          break;
-        }
-      }
-    };
-  };
-
   return {
     schema,
     setSchema,
     stateFiles,
     resolve,
     addEventListener,
-    createRequestHandler,
     createStateFile,
     createdStateFile,
     updateStateFile,
@@ -258,11 +183,7 @@ export function createVirtualServer(props: VirtualServerArgs): VirtualServer {
 
 export type VirtualServerRemote = Omit<
   VirtualServer,
-  | "setSchema"
-  | "createRequestHandler"
-  | "createdStateFile"
-  | "updatedStateFile"
-  | "deletedStateFile"
+  "setSchema" | "createdStateFile" | "updatedStateFile" | "deletedStateFile"
 >;
 
 createVirtualServer.fromHttpServer = async function fromHttpServer(

@@ -1,5 +1,6 @@
 import { toStructype } from "@kube/structype-graphql";
 import { createVirtualServer } from "@kube/virtual";
+import { createRequestHandler } from "@kube/virtual/createRequestHandler";
 import tailwindcss from "@tailwindcss/vite";
 import react from "@vitejs/plugin-react";
 import chokidar from "chokidar";
@@ -65,7 +66,7 @@ const devVirtualAPIPlugin = async (): Promise<Plugin> => {
         }
       });
 
-      server.middlewares.use(virtualServer.createRequestHandler());
+      server.middlewares.use(createRequestHandler(virtualServer));
     },
   };
 };
