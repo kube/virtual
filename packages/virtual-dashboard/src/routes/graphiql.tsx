@@ -18,11 +18,13 @@ export default function GraphiqlView() {
   return (
     <div
       ref={wrapperRef}
-      style={{
-        "--editor-background": "#1e1e1e",
-        "--font-size-body": "13px",
-        "--font-family-mono": "DM Mono",
-      }}
+      style={
+        {
+          "--editor-background": "#1e1e1e",
+          "--font-size-body": "13px",
+          "--font-family-mono": "DM Mono",
+        } as React.CSSProperties
+      }
       onKeyDown={async (e) => {
         const isModifierKeyPressed = isMac() ? e.metaKey : e.ctrlKey;
         if (isModifierKeyPressed && e.key === "Enter") {

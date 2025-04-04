@@ -1,4 +1,7 @@
 {
+  "include": [
+    "src/**/*"
+  ],
   "compilerOptions": {
     "lib": [
       "DOM",
@@ -26,6 +29,6 @@
     "resolveJsonModule": true,
     "skipLibCheck": true,
     "strict": true,
-    "noUncheckedIndexedAccess": true
+    "noUncheckedIndexedAccess": true,
   }
 }
