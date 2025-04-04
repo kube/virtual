@@ -29,6 +29,7 @@ export const MonacoEditor: React.FC<MonacoEditorProps> = ({
       lineNumbers: "off",
       fontFamily: "DM Mono",
       fontSize: 13,
+      tabSize: 2,
       scrollbar: {
         verticalScrollbarSize: 0,
         verticalSliderSize: 0,
