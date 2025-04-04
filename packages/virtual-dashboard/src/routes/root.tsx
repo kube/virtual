@@ -37,7 +37,7 @@ const PaneGroup: React.FC<React.PropsWithChildren> = ({ children }) => {
     <div className="p-2 pt-0 flex w-full h-full max-h-full">
       <ResizablePanelGroup
         direction="horizontal"
-        className="relative w-full grow"
+        className="relative w-full h-full max-h-full"
       >
         <ResizablePanel minSize={10}>
           <Pane
@@ -87,7 +87,7 @@ const Pane: React.FC<
       )}
     >
       <div className="flex flex-col w-full h-full rounded-md overflow-hidden border border-gray-700 bg-[#131313]">
-        <div className="grow-0 shrink-0 h-6 flex py-1 px-2 text-sm select-none">
+        <div className="grow-0 shrink-0 h-6 flex py-1 px-2 text-sm select-none overflow-hidden">
           <div className="grow flex items-center gap-1">
             <span className="text-xs text-gray-400 truncate">{title}</span>
           </div>
@@ -99,7 +99,11 @@ const Pane: React.FC<
             )}
           </div>
         </div>
-        <div className="grow">{children}</div>
+        <div className="relative grow overflow-hidden">
+          <div className="absolute overflow-hidden top-0 left-0 bottom-0 right-0">
+            {children}
+          </div>
+        </div>
       </div>
     </div>
   );
