@@ -6,7 +6,6 @@ import { print } from "graphql";
 import { Schema_Index, serialize } from "@kube/structype";
 import { readFileSync, watchFile, writeFileSync } from "fs";
 import { createServer } from "http";
-import { createVirtualInstance } from "./Server.js";
 
 // TODO: Rewrite for better control flow and type safety
 async function compile(
@@ -77,8 +76,13 @@ program
       watch: true,
     });
 
-    const virtual = createVirtualInstance({ schema });
-    const server = createServer(virtual);
+    const server = createServer((_req, res) => {
+      // Need to:
+      // 1. Create a VirtualServer
+      // 2. Serve <VirtualDashboard /> component bound to it
+      console.log({ schema });
+      res.end("In development.");
+    });
 
     server.listen(4000, () => {
       console.log(">> Server is running on http://localhost:4000");
