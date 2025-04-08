@@ -181,7 +181,13 @@ export default function RootView() {
             onClick={() =>
               virtualServer.createStateFile({
                 path: "new.state.ts",
-                content: "export default VirtualState({})",
+                content: [
+                  "export default VirtualState({",
+                  "  options: {},",
+                  "  store: {},",
+                  "  resolvers: {},",
+                  "})",
+                ].join("\n"),
               })
             }
           >

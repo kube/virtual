@@ -44,10 +44,10 @@ export async function loadVirtualLibsIntoMonaco(
   // Set extra libs in Monaco, for .d.ts and packages types index
 
   const virtualStateDts = `
-    import type { ResolversFromSchemaIndex } from "@kube/virtual";
+    import type { VirtualState } from "@kube/virtual";
     declare global {
       type __VirtualSchema = ${JSON.stringify(schema)};
-      function VirtualState(input: ResolversFromSchemaIndex<__VirtualSchema>): void;
+      function VirtualState(input: VirtualState<__VirtualSchema>): typeof input;
     }`;
 
   const virtualStateDtsUri = monaco.Uri.parse(`${rootPath}__virtual.d.ts`);

@@ -19,6 +19,18 @@ export default function DemoPage() {
   useEffect(() => {
     const server = createVirtualServer({
       schema,
+      initialStateFiles: [
+        {
+          path: "hello.state.ts",
+          content: [
+            `export default VirtualState({`,
+            `  options: {},`,
+            `  store: {},`,
+            `  resolvers: {},`,
+            `});`,
+          ].join("\n"),
+        },
+      ],
       api: {
         createStateFile: async (file: { path: string; content: string }) => {
           console.log("createStateFile", file);
@@ -32,11 +44,6 @@ export default function DemoPage() {
           server.createdStateFile(file);
         },
       },
-    });
-
-    server.createdStateFile({
-      path: "hello.state.ts",
-      content: `export default VirtualState({});`,
     });
     setVirtualServer(server);
   }, [schema]);

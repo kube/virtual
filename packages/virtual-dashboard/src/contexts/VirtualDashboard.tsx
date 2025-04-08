@@ -114,8 +114,6 @@ export const VirtualDashboardContextProvider: React.FC<
   }, [monaco, schema]);
 
   useEffect(() => {
-    if (!monaco) return;
-
     // Create model for initial state files
     virtualServer.stateFiles.forEach(createOrUpdateModel);
 

@@ -22,9 +22,23 @@ const devVirtualAPIPlugin = async (): Promise<Plugin> => {
         return fs.readFile(schemaPath, "utf-8").then(toStructype);
       }
 
+      const initialStateFiles = await fs
+        .readdir(stateFilesPath)
+        .then((files) => {
+          return Promise.all(
+            files.map((file) =>
+              fs
+                .readFile(stateFilesPath + file, "utf-8")
+                .then((content) => ({ path: file, content }))
+            )
+          );
+        })
+        .then((files) => files.filter((file) => file.content));
+
       const schema = await getAndCompileSchema();
       const virtualServer = createVirtualServer({
         schema,
+        initialStateFiles,
         api: {
           createStateFile: async (file: { path: string; content: string }) => {
             await fs.writeFile(stateFilesPath + file.path, file.content);
@@ -46,25 +60,27 @@ const devVirtualAPIPlugin = async (): Promise<Plugin> => {
         virtualServer.setSchema(schema);
       });
 
-      chokidar.watch(stateFilesPath).on("all", async (event, realPath) => {
-        const path = realPath.replace(stateFilesPath, "");
-        switch (event) {
-          case "add": {
-            const content = await fs.readFile(realPath, "utf-8");
-            virtualServer.createdStateFile({ path, content });
-            break;
+      chokidar
+        .watch(stateFilesPath, { ignoreInitial: true })
+        .on("all", async (event, realPath) => {
+          const path = realPath.replace(stateFilesPath, "");
+          switch (event) {
+            case "add": {
+              const content = await fs.readFile(realPath, "utf-8");
+              virtualServer.createdStateFile({ path, content });
+              break;
+            }
+            case "unlink": {
+              virtualServer.deletedStateFile(path);
+              break;
+            }
+            case "change": {
+              const content = await fs.readFile(realPath, "utf-8");
+              virtualServer.updatedStateFile({ path, content });
+              break;
+            }
           }
-          case "unlink": {
-            virtualServer.deletedStateFile(path);
-            break;
-          }
-          case "change": {
-            const content = await fs.readFile(realPath, "utf-8");
-            virtualServer.updatedStateFile({ path, content });
-            break;
-          }
-        }
-      });
+        });
 
       server.middlewares.use(createRequestHandler(virtualServer));
     },
