@@ -3,12 +3,21 @@ import { Schema_Index } from "@kube/structype";
 import { toGraphqlSchema } from "@kube/structype-graphql";
 import { execute, parse } from "graphql";
 import { createDefaultResolvers } from "./createDefaultResolvers.js";
+import { VirtualState } from "./VirtualState.js";
+
+type VirtualStateFile = {
+  readonly path: string;
+  readonly content: string;
+  options?: VirtualState["options"];
+  compilationError?: boolean;
+};
 
 type VIRTUALSERVER_EVENTS_TYPEMAP = {
   schema_updated: Schema_Index;
   query_received: string;
-  statefile_created: { path: string; content: string };
-  statefile_updated: { path: string; content: string };
+  statefile_selected: VirtualStateFile;
+  statefile_created: VirtualStateFile;
+  statefile_updated: VirtualStateFile;
   statefile_deleted: { path: string };
 };
 
@@ -23,19 +32,16 @@ export type VirtualServer_EventListener = (event: VirtualServer_Event) => void;
 
 type Disposer = () => void;
 
-type VirtualStateFile = {
-  readonly path: string;
-  readonly content: string;
-};
-
 export type VirtualServer = {
   readonly schema: Schema_Index;
   readonly setSchema: (schema: Schema_Index) => void;
   readonly stateFiles: VirtualStateFile[];
+  readonly currentStateFile: VirtualStateFile | undefined;
   readonly addEventListener: (
     callback: VirtualServer_EventListener
   ) => Disposer;
   readonly resolve: (query: string) => Promise<any>;
+  readonly selectStateFile: (path: string) => void;
   readonly createStateFile: (file: VirtualStateFile) => void;
   readonly createdStateFile: (file: VirtualStateFile) => void;
   readonly updateStateFile: (file: VirtualStateFile) => void;
@@ -57,6 +63,7 @@ type VirtualServerArgs = {
 export type InitialState = {
   schema: Schema_Index;
   stateFiles: VirtualStateFile[];
+  currentStateFile: VirtualStateFile | undefined;
 };
 
 function mergeDeepResolvers(...resolvers: any[]) {
@@ -73,13 +80,18 @@ function mergeDeepResolvers(...resolvers: any[]) {
   return merged;
 }
 
+// THIS SHOULD BE REWRITTEN IN A FULL EVENT-DRIVEN WAY
+// POSSIBLY USING RXJS
+// FOR NOW EVERYTHING IS A MESS, JUST TO GET IT WORKING
+// AND WE CAN REFACTOR LATER
+// THE REFACTORING WOULD OF COURSE CHANGE THE API TOO
 export function createVirtualServer(props: VirtualServerArgs): VirtualServer {
   let schema = props.schema;
 
   let stateFiles: VirtualStateFile[] = props.initialStateFiles;
 
   let currentStateFile = stateFiles[0];
-  let compiledVirtualState = { resolvers: {} };
+  let compiledVirtualState = { resolvers: {}, options: {} };
 
   if (currentStateFile) compileState(currentStateFile);
 
@@ -105,20 +117,31 @@ export function createVirtualServer(props: VirtualServerArgs): VirtualServer {
       function VirtualState(x) { return x; }
       ${state.content}
     `)}`;
-    const module = await import(moduleUrl);
+    const module = await import(/* @vite-ignore */ moduleUrl);
     return module.default;
   }
 
   // TODO: RENAME THIS, OR MAKE IT REALLY EVENT-DRIVEN
   async function compileState(state: VirtualStateFile) {
-    compiledVirtualState = await compileVirtualState(state);
-    executableSchema = makeExecutableSchema({
-      typeDefs: toGraphqlSchema(schema),
-      resolvers: mergeDeepResolvers(
-        defaultResolvers,
-        compiledVirtualState.resolvers
-      ),
-    });
+    try {
+      compiledVirtualState = await compileVirtualState(state);
+      state.options = compiledVirtualState.options;
+      state.compilationError = false;
+      executableSchema = makeExecutableSchema({
+        typeDefs: toGraphqlSchema(schema),
+        resolvers: mergeDeepResolvers(
+          defaultResolvers,
+          compiledVirtualState.resolvers
+        ),
+      });
+    } catch {
+      // Fallback on default resolvers
+      state.compilationError = true;
+      executableSchema = makeExecutableSchema({
+        typeDefs: toGraphqlSchema(schema),
+        resolvers: defaultResolvers,
+      });
+    }
   }
 
   const setSchema: VirtualServer["setSchema"] = (newSchema) => {
@@ -151,22 +174,31 @@ export function createVirtualServer(props: VirtualServerArgs): VirtualServer {
     };
   };
 
+  const selectStateFile: VirtualServer["selectStateFile"] = (path) => {
+    const file = stateFiles.find((file) => file.path === path);
+    if (file) {
+      currentStateFile = file;
+      compileState(file);
+      dispatch({ type: "statefile_selected", payload: file });
+    }
+  };
+
   const createStateFile: VirtualServer["createStateFile"] = (file) => {
     props.api.createStateFile(file);
   };
 
-  function createOrUpdateStateFile(file: VirtualStateFile) {
+  async function createOrUpdateStateFile(file: VirtualStateFile) {
     const index = stateFiles.findIndex((f) => f.path === file.path);
     if (index !== -1) {
       stateFiles[index] = file;
     } else {
       stateFiles.push(file);
     }
-    compileState(file);
+    await compileState(file);
   }
 
-  const createdStateFile: VirtualServer["createdStateFile"] = (file) => {
-    createOrUpdateStateFile(file);
+  const createdStateFile: VirtualServer["createdStateFile"] = async (file) => {
+    await createOrUpdateStateFile(file);
     dispatch({ type: "statefile_created", payload: file });
   };
 
@@ -174,8 +206,8 @@ export function createVirtualServer(props: VirtualServerArgs): VirtualServer {
     props.api.updateStateFile(file);
   };
 
-  const updatedStateFile: VirtualServer["updatedStateFile"] = (file) => {
-    createOrUpdateStateFile(file);
+  const updatedStateFile: VirtualServer["updatedStateFile"] = async (file) => {
+    await createOrUpdateStateFile(file);
     dispatch({ type: "statefile_updated", payload: file });
   };
 
@@ -198,6 +230,10 @@ export function createVirtualServer(props: VirtualServerArgs): VirtualServer {
     },
     resolve,
     addEventListener,
+    selectStateFile,
+    get currentStateFile() {
+      return currentStateFile;
+    },
     createStateFile,
     createdStateFile,
     updateStateFile,
@@ -215,9 +251,12 @@ export type VirtualServerRemote = Omit<
 createVirtualServer.fromHttpServer = async function fromHttpServer(
   url: string
 ): Promise<VirtualServerRemote> {
-  let { schema, stateFiles } = (await fetch(`${url}_virtual/initial`).then(
-    (_) => _.json()
-  )) as InitialState;
+  function fetchInitialState(): Promise<InitialState> {
+    return fetch(`${url}_virtual/initial`).then((_) => _.json());
+  }
+
+  let { schema, stateFiles, currentStateFile } = await fetchInitialState();
+
   const eventSource = new EventSource(`${url}_virtual/events`);
 
   eventSource.addEventListener("message", (_) => {
@@ -225,6 +264,10 @@ createVirtualServer.fromHttpServer = async function fromHttpServer(
     switch (event.type) {
       case "schema_updated": {
         schema = event.payload;
+        break;
+      }
+      case "statefile_selected": {
+        currentStateFile = event.payload;
         break;
       }
       case "statefile_created":
@@ -254,6 +297,19 @@ createVirtualServer.fromHttpServer = async function fromHttpServer(
     }
     eventSource.addEventListener("message", listener);
     return () => eventSource.removeEventListener("message", listener);
+  };
+
+  const selectStateFile: VirtualServer["selectStateFile"] = (path) => {
+    fetch(`${url}_virtual/emit`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        operation: "statefile_select",
+        path,
+      }),
+    });
   };
 
   const createStateFile: VirtualServer["createdStateFile"] = async (file) => {
@@ -309,8 +365,16 @@ createVirtualServer.fromHttpServer = async function fromHttpServer(
   };
 
   return {
-    schema,
-    stateFiles,
+    get schema() {
+      return schema;
+    },
+    get stateFiles() {
+      return stateFiles;
+    },
+    get currentStateFile() {
+      return currentStateFile;
+    },
+    selectStateFile,
     resolve,
     addEventListener,
     createStateFile,

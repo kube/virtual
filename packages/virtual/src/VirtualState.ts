@@ -9,7 +9,7 @@ type VirtualStateOptions = {
   [key: string]: VirtualStateOptions_Item;
 };
 
-export type VirtualState<S extends Schema_Index> = {
+export type VirtualState<S extends Schema_Index = Schema_Index> = {
   store?: {};
   options?: VirtualStateOptions;
   resolvers: ResolversFromSchemaIndex<S>;

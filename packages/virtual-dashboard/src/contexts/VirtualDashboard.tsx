@@ -18,7 +18,7 @@ type StateFilesMap = Record<
   string,
   | {
       isDirty: boolean;
-      stateFile: { path: string; content: string };
+      stateFile: VirtualServerRemote["stateFiles"][number];
       model: editor.ITextModel;
     }
   | undefined
@@ -28,30 +28,21 @@ export const VirtualDashboardContext = createContext<{
   virtualServer: VirtualServerRemote;
   stateFilesMap: StateFilesMap;
   currentStateFile: StateFilesMap[string];
-  setCurrentStateFilePath: (path: string) => void;
+  selectStateFile: VirtualServerRemote["selectStateFile"];
 }>({} as any);
 
 export const VirtualDashboardContextProvider: React.FC<
   React.PropsWithChildren
 > = ({ children }) => {
-  const { virtualServer } = use(VirtualContext);
+  const { virtualServer, schema, currentStateFilePath, selectStateFile } =
+    use(VirtualContext);
 
-  const { schema } = use(VirtualContext);
   const monaco = use(MonacoContext);
 
   const [stateFilesMap, setStateFilesMap] = useState<StateFilesMap>({});
-  const [currentStateFilePath, setCurrentStateFilePath] = useState<string>();
   const currentStateFile = currentStateFilePath
     ? stateFilesMap[currentStateFilePath]
     : undefined;
-
-  useEffect(() => {
-    // If no currentStateFilePath, or not in the stateFilesMap, set to first one, or undefined if none
-    if (!currentStateFilePath || !stateFilesMap[currentStateFilePath]) {
-      const firstStateFile = Object.values(stateFilesMap)[0];
-      setCurrentStateFilePath(firstStateFile?.stateFile.path);
-    }
-  }, [currentStateFilePath, stateFilesMap]);
 
   function getStateFileUri(stateFile: { path: string }) {
     return monaco.Uri.parse(STATE_FILES_ROOT_PATH + stateFile.path);
@@ -92,14 +83,18 @@ export const VirtualDashboardContextProvider: React.FC<
         uri
       );
       model.onDidChangeContent(() => {
-        setStateFilesMap((prev) => ({
-          ...prev,
-          [stateFile.path]: {
-            isDirty: model.getValue() !== stateFile.content,
-            stateFile,
-            model,
-          },
-        }));
+        setStateFilesMap((prev) => {
+          const currentStateFile = prev[stateFile.path]!;
+
+          return {
+            ...prev,
+            [stateFile.path]: {
+              isDirty: model.getValue() !== currentStateFile.stateFile.content,
+              stateFile: currentStateFile.stateFile,
+              model,
+            },
+          };
+        });
       });
       setStateFilesMap((prev) => ({
         ...prev,
@@ -148,7 +143,7 @@ export const VirtualDashboardContextProvider: React.FC<
         virtualServer,
         stateFilesMap,
         currentStateFile,
-        setCurrentStateFilePath,
+        selectStateFile,
       }}
     >
       <GraphiqlEditorContextProvider query={defaultQuery}>

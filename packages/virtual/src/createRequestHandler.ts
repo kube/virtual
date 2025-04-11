@@ -10,7 +10,7 @@ export function createRequestHandler(
       return next();
     }
 
-    const { schema, stateFiles } = virtualServer;
+    const { schema, stateFiles, currentStateFile } = virtualServer;
 
     switch (req.url) {
       case "/_virtual/initial": {
@@ -18,6 +18,7 @@ export function createRequestHandler(
         const initialState: InitialState = {
           schema,
           stateFiles,
+          currentStateFile,
         };
         res.end(JSON.stringify(initialState));
         break;
@@ -38,6 +39,11 @@ export function createRequestHandler(
           res.setHeader("Content-Type", "application/json");
           const operation = fields.operation as any as string;
           switch (operation) {
+            case "statefile_select": {
+              const path = fields.path as any as string;
+              virtualServer.selectStateFile(path);
+              break;
+            }
             case "statefile_create": {
               const path = fields.path as any as string;
               const content = fields.content as any as string;

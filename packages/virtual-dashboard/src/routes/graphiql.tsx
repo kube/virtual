@@ -43,7 +43,9 @@ export default function GraphiqlView() {
           <div className="bg-white h-[1px] opacity-10 group-hover:opacity-20 group-active:opacity-40 transition-opacity duration-300" />
         </ResizableHandle>
         <ResizablePanel>
-          <pre className="p-2.5">{JSON.stringify(result, null, 2)}</pre>
+          <pre style={{ fontFamily: "DM Mono" }} className="p-2.5">
+            {JSON.stringify(result, null, 2)}
+          </pre>
         </ResizablePanel>
       </ResizablePanelGroup>
     </div>

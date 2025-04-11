@@ -5,6 +5,8 @@ import { createContext, useEffect, useState } from "react";
 type VirtualContext = {
   schema: VirtualServerRemote["schema"];
   stateFiles: VirtualServerRemote["stateFiles"];
+  currentStateFilePath: string | undefined;
+  selectStateFile: (path: string) => void;
   virtualServer: VirtualServerRemote;
 };
 
@@ -20,6 +22,9 @@ export const VirtualContextProvider: React.FC<VirtualServerProviderProps> = ({
 }) => {
   const [schema, setSchema] = useState(virtualServer.schema);
   const [stateFiles, _setStateFiles] = useState(virtualServer.stateFiles);
+  const [currentStateFilePath, _setCurrentStateFilePath] = useState(
+    virtualServer.currentStateFile?.path
+  );
 
   useEffect(
     () =>
@@ -31,13 +36,26 @@ export const VirtualContextProvider: React.FC<VirtualServerProviderProps> = ({
           case "query_received": {
             return console.log("Query Received", event.payload);
           }
+          case "statefile_selected": {
+            return _setCurrentStateFilePath(event.payload.path);
+          }
         }
       }),
     [virtualServer]
   );
 
+  const selectStateFile = virtualServer.selectStateFile;
+
   return (
-    <VirtualContext.Provider value={{ schema, stateFiles, virtualServer }}>
+    <VirtualContext.Provider
+      value={{
+        schema,
+        stateFiles,
+        virtualServer,
+        currentStateFilePath,
+        selectStateFile,
+      }}
+    >
       {children}
     </VirtualContext.Provider>
   );

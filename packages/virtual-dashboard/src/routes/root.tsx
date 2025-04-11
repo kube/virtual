@@ -1,3 +1,4 @@
+import { SelectContent, SelectItem } from "@radix-ui/react-select";
 import { Maximize2Icon, Minimize2Icon } from "lucide-react";
 import { use, useEffect, useRef, useState } from "react";
 import {
@@ -7,7 +8,6 @@ import {
 } from "react-resizable-panels";
 import { twMerge } from "tailwind-merge";
 import { Logo } from "~/components/Logo";
-import { Button } from "~/components/ui/button";
 import {
   CommandDialog,
   CommandEmpty,
@@ -17,12 +17,14 @@ import {
   CommandList,
   CommandSeparator,
 } from "~/components/ui/command";
+import { Select, SelectTrigger, SelectValue } from "~/components/ui/select";
 import { VirtualDashboardContext } from "~/contexts/VirtualDashboard";
 import "../app.css";
 import GraphiqlView from "./graphiql";
 import StateView from "./state";
 
-const PaneGroup: React.FC<React.PropsWithChildren> = ({ children }) => {
+const PaneGroup: React.FC = () => {
+  const { currentStateFile } = use(VirtualDashboardContext);
   const [maximizedPane, setMaximizedPane] = useState<string>();
 
   function onMaximizeChange(id: string) {
@@ -42,7 +44,9 @@ const PaneGroup: React.FC<React.PropsWithChildren> = ({ children }) => {
         <ResizablePanel minSize={10}>
           <Pane
             id="state-pane"
-            title="State Editor"
+            title={`State Editor ${
+              currentStateFile?.isDirty ? "(UNSAVED)" : ""
+            }`}
             onMaximizeToggle={onMaximizeChange}
             maximizedPane={maximizedPane}
           >
@@ -110,12 +114,9 @@ const Pane: React.FC<
 };
 
 export default function RootView() {
-  const {
-    virtualServer,
-    stateFilesMap,
-    setCurrentStateFilePath,
-    currentStateFile,
-  } = use(VirtualDashboardContext);
+  const { stateFilesMap, selectStateFile, currentStateFile } = use(
+    VirtualDashboardContext
+  );
 
   const rootRef = useRef<HTMLDivElement>(null);
   const [paletteOpen, setPaletteOpen] = useState(false);
@@ -161,39 +162,23 @@ export default function RootView() {
           </CommandDialog>
         </div>
 
-        <div className="flex items-center gap-1">
-          {Object.entries(stateFilesMap).map(([path], index) => (
-            <Button key={path} onClick={() => setCurrentStateFilePath(path)}>
-              {path.toString().replace("inmemory://_virtual/states/", "")}
-              {currentStateFile?.stateFile.path === path && (
-                <div className="w-4 flex justify-center">
-                  <div
-                    className={[
-                      "rounded-4xl w-2 h-2",
-                      currentStateFile.isDirty ? "bg-red-600" : "bg-slate-400",
-                    ].join(" ")}
-                  />
-                </div>
-              )}
-            </Button>
-          ))}
-          <Button
-            onClick={() =>
-              virtualServer.createStateFile({
-                path: "new.state.ts",
-                content: [
-                  "export default VirtualState({",
-                  "  options: {},",
-                  "  store: {},",
-                  "  resolvers: {},",
-                  "})",
-                ].join("\n"),
-              })
-            }
-          >
-            +
-          </Button>
-        </div>
+        <Select
+          value={currentStateFile?.stateFile.path}
+          onValueChange={selectStateFile}
+        >
+          <SelectTrigger className="w-[180px]">
+            <SelectValue placeholder="State File">
+              {currentStateFile?.stateFile.path}
+            </SelectValue>
+          </SelectTrigger>
+          <SelectContent>
+            {Object.entries(stateFilesMap).map(([path, stateFile]) => (
+              <SelectItem key={path} value={path}>
+                {path.toString().replace("inmemory://_virtual/states/", "")}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
       </div>
 
       <div className="flex flex-1 shrink-0">
