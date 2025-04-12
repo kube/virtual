@@ -6,7 +6,13 @@ import {
   PanelGroup as ResizablePanelGroup,
 } from "react-resizable-panels";
 import { Input } from "~/components/ui/input";
+import { Slider } from "~/components/ui/slider";
 import { Switch } from "~/components/ui/switch";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "~/components/ui/tooltip";
 import { VirtualDashboardContext } from "~/contexts/VirtualDashboard";
 import { MonacoEditor } from "~/lib/MonacoEditor";
 
@@ -25,7 +31,14 @@ const StateOption: React.FC<{
         ) : option.type === "String" ? (
           <Input type="text" />
         ) : option.type === "Number" ? (
-          <Input type="number" />
+          <Tooltip>
+            <TooltipTrigger className="w-full">
+              <Slider defaultValue={[33]} max={100} step={1} />
+            </TooltipTrigger>
+            <TooltipContent>
+              <div className="text-xs text-white">{option.type}</div>
+            </TooltipContent>
+          </Tooltip>
         ) : (
           "Invalid option type"
         )}
