@@ -115,11 +115,11 @@ export function createVirtualServer(props: VirtualServerArgs): VirtualServer {
     }
   }
 
-  async function compileVirtualState(state: VirtualStateFile) {
+  async function compileVirtualState(stateFile: VirtualStateFile) {
     const moduleUrl = `data:text/javascript,${encodeURIComponent(`
       function VirtualState(x) { return x; }
       VirtualState.withOptions = (options) => (x) => ({ ...x, options });
-      ${state.content}
+      ${stateFile.content}
     `)}`;
     const module = await import(/* @vite-ignore */ moduleUrl);
     return module.default;

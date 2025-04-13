@@ -6,7 +6,7 @@ export default VirtualState.withOptions({
   resolvers: {
     Query: {
       // Write your resolvers here
-      hello: () => "Hello!",
+      hello: () => options.Toto.valueOf() ? "Hello" : "John",
     },
   }
 }));

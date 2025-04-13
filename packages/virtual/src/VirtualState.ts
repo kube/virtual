@@ -18,6 +18,19 @@ export interface VirtualState<
   resolvers: ResolversFromSchemaIndex<S, {}, {}>;
 }
 
+type InferVirtualStateOptions_Item<I extends VirtualStateOptions_Item> =
+  I extends { type: "Boolean" }
+    ? boolean
+    : I extends { type: "Number" }
+    ? number
+    : I extends { type: "String" }
+    ? string
+    : never;
+
+type InferVirtualStateOptions<O extends VirtualStateOptions> = {
+  [K in keyof O]: InferVirtualStateOptions_Item<O[K]>;
+};
+
 export interface VirtualStateConstructor<
   S extends Schema_Index = Schema_Index,
   O extends VirtualStateOptions = {}
@@ -25,7 +38,9 @@ export interface VirtualStateConstructor<
   (
     props:
       | VirtualState<S, O>
-      | ((options: O) => Omit<VirtualState<S, O>, "options">)
+      | ((
+          options: InferVirtualStateOptions<O>
+        ) => Omit<VirtualState<S, O>, "options">)
   ): VirtualState<S, O>;
   withOptions: <O extends VirtualStateOptions>(
     options: O
