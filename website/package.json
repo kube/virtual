@@ -9,6 +9,7 @@
     "typecheck": "react-router typegen && tsc"
   },
   "dependencies": {
+    "@apollo/client": "4.0.0-alpha.9",
     "@graphiql/react": "^0.28.2",
     "@kube/math": "^0.0.7",
     "@kube/structype": "workspace:*",

@@ -1,7 +1,7 @@
 import { makeExecutableSchema } from "@graphql-tools/schema";
 import { Schema_Index } from "@kube/structype";
 import { toGraphqlSchema } from "@kube/structype-graphql";
-import { execute, parse } from "graphql";
+import { DocumentNode, execute, parse } from "graphql";
 import { createDefaultResolvers } from "./createDefaultResolvers.js";
 import { VirtualState } from "./VirtualState.js";
 
@@ -40,7 +40,10 @@ export type VirtualServer = {
   readonly addEventListener: (
     callback: VirtualServer_EventListener
   ) => Disposer;
-  readonly resolve: (query: string) => Promise<any>;
+  readonly resolve: (
+    query: string | DocumentNode,
+    variables?: any
+  ) => Promise<any>;
   readonly selectStateFile: (path: string) => void;
   readonly createStateFile: (file: VirtualStateFile) => void;
   readonly createdStateFile: (file: VirtualStateFile) => void;
@@ -157,12 +160,12 @@ export function createVirtualServer(props: VirtualServerArgs): VirtualServer {
     dispatch({ type: "schema_updated", payload: schema });
   };
 
-  const resolve: VirtualServer["resolve"] = async (query) => {
-    const queryDoc = parse(query);
+  const resolve: VirtualServer["resolve"] = async (query, variables) => {
+    const queryDoc = typeof query === "string" ? parse(query) : query;
     return execute({
       schema: executableSchema,
       document: queryDoc,
-      variableValues: {},
+      variableValues: variables,
       contextValue: { hello: "world" },
     });
   };

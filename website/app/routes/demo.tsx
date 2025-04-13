@@ -3,15 +3,11 @@ import { type VirtualServer, createVirtualServer } from "@kube/virtual";
 import { VirtualDashboard } from "@kube/virtual-dashboard";
 import { useEffect, useState } from "react";
 import { Panel, PanelGroup, PanelResizeHandle } from "react-resizable-panels";
-import { DemoApp } from "~/components/DemoApp";
 import { VirtualDashboardWrapper } from "~/components/VirtualDashboardWrapper";
+import DemoApp from "~/demo/App";
+import graphqlSchema from "~/demo/schema.graphql?raw";
 
-const schema = toStructype(`
-  type Query {
-    hello: String
-    world: Boolean!
-  }
-`);
+const schema = toStructype(graphqlSchema);
 
 export default function DemoPage() {
   const [virtualServer, setVirtualServer] = useState<VirtualServer>();
@@ -26,7 +22,11 @@ export default function DemoPage() {
             `export default VirtualState({`,
             `  options: {},`,
             `  store: {},`,
-            `  resolvers: {},`,
+            `  resolvers: {`,
+            `    Query: {`,
+            `      todos: () => [{}, {}],`,
+            `    }`,
+            `  },`,
             `});`,
           ].join("\n"),
         },
