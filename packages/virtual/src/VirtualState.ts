@@ -9,8 +9,25 @@ type VirtualStateOptions = {
   [key: string]: VirtualStateOptions_Item;
 };
 
-export type VirtualState<S extends Schema_Index = Schema_Index> = {
+export interface VirtualState<
+  S extends Schema_Index = Schema_Index,
+  O extends VirtualStateOptions = {}
+> {
   store?: {};
-  options?: VirtualStateOptions;
-  resolvers: ResolversFromSchemaIndex<S>;
-};
+  options: O;
+  resolvers: ResolversFromSchemaIndex<S, {}, {}>;
+}
+
+export interface VirtualStateConstructor<
+  S extends Schema_Index = Schema_Index,
+  O extends VirtualStateOptions = {}
+> {
+  (
+    props:
+      | VirtualState<S, O>
+      | ((options: O) => Omit<VirtualState<S, O>, "options">)
+  ): VirtualState<S, O>;
+  withOptions: <O extends VirtualStateOptions>(
+    options: O
+  ) => VirtualStateConstructor<S, O>;
+}

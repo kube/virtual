@@ -118,6 +118,7 @@ export function createVirtualServer(props: VirtualServerArgs): VirtualServer {
   async function compileVirtualState(state: VirtualStateFile) {
     const moduleUrl = `data:text/javascript,${encodeURIComponent(`
       function VirtualState(x) { return x; }
+      VirtualState.withOptions = (options) => (x) => ({ ...x, options });
       ${state.content}
     `)}`;
     const module = await import(/* @vite-ignore */ moduleUrl);
@@ -137,7 +138,8 @@ export function createVirtualServer(props: VirtualServerArgs): VirtualServer {
           compiledVirtualState.resolvers
         ),
       });
-    } catch {
+    } catch (err) {
+      console.error("Error compiling state file", err);
       // Fallback on default resolvers
       state.compilationError = true;
       executableSchema = makeExecutableSchema({

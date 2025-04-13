@@ -103,8 +103,8 @@ const Pane: React.FC<
             )}
           </div>
         </div>
-        <div className="relative grow overflow-hidden">
-          <div className="absolute overflow-hidden top-0 left-0 bottom-0 right-0">
+        <div className="relative grow">
+          <div className="absolute top-0 left-0 bottom-0 right-0">
             {children}
           </div>
         </div>
