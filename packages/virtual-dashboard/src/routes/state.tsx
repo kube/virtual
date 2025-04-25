@@ -1,5 +1,5 @@
-import type { VirtualState } from "@kube/virtual";
-import { use } from "react";
+import type { VirtualStateFile } from "@kube/virtual";
+import { use, useEffect, useState } from "react";
 import {
   PanelResizeHandle as ResizableHandle,
   Panel as ResizablePanel,
@@ -20,20 +20,37 @@ type StateEditorProps = {};
 
 const StateOption: React.FC<{
   name: string;
-  option: NonNullable<VirtualState["options"]>[string];
-}> = ({ name, option }) => {
+  option: NonNullable<VirtualStateFile["options"]>[string];
+  initialValue: any;
+  onChange: (key: string, value: any) => void;
+}> = ({ name, option, initialValue, onChange }) => {
+  const [value, setValue] = useState(initialValue);
+
+  useEffect(() => {
+    onChange(name, value);
+  }, [value]);
+
   return (
     <>
       <div className="">{name}</div>
       <div className="">
         {option.type === "Boolean" ? (
-          <Switch />
+          <Switch checked={value} onCheckedChange={setValue} />
         ) : option.type === "String" ? (
-          <Input type="text" />
+          <Input
+            type="text"
+            value={initialValue}
+            onChange={(e) => setValue(e.currentTarget.value)}
+          />
         ) : option.type === "Number" ? (
           <Tooltip>
             <TooltipTrigger className="w-full">
-              <Slider defaultValue={[33]} max={100} step={1} />
+              <Slider
+                max={100}
+                step={1}
+                value={value}
+                onValueChange={(values) => setValue(values[0])}
+              />
             </TooltipTrigger>
             <TooltipContent>
               <div className="text-xs text-white">{option.type}</div>
@@ -47,9 +64,11 @@ const StateOption: React.FC<{
   );
 };
 
-const StateOptions: React.FC<{ options: VirtualState["options"] }> = ({
-  options,
-}) => {
+const StateOptions: React.FC<{
+  options: VirtualStateFile["options"];
+  initialValues: VirtualStateFile["optionsValues"];
+  onChange: (key: string, value: any) => void;
+}> = ({ options, initialValues, onChange }) => {
   const hasOptions = options && Object.keys(options).length > 0;
 
   return (
@@ -58,7 +77,13 @@ const StateOptions: React.FC<{ options: VirtualState["options"] }> = ({
       {hasOptions ? (
         <div className="grid grid-cols-2 gap-2 p-2">
           {Object.entries(options).map(([key, value]) => (
-            <StateOption key={key} name={key} option={value} />
+            <StateOption
+              key={key}
+              name={key}
+              option={value}
+              onChange={onChange}
+              initialValue={initialValues?.[key]}
+            />
           ))}
         </div>
       ) : (
@@ -105,7 +130,19 @@ function StateEditor({}: StateEditorProps) {
           </ResizableHandle>
 
           <ResizablePanel>
-            <StateOptions options={currentStateFile?.stateFile.options} />
+            {currentStateFile && (
+              <StateOptions
+                options={currentStateFile.stateFile.options ?? {}}
+                initialValues={currentStateFile.stateFile.optionsValues ?? {}}
+                onChange={(key, value) =>
+                  virtualServer.updateStateFileOption(
+                    currentStateFile.stateFile.path,
+                    key,
+                    value
+                  )
+                }
+              />
+            )}
           </ResizablePanel>
         </ResizablePanelGroup>
       </div>

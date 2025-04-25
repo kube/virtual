@@ -11,7 +11,7 @@ type VirtualStateOptions = {
 
 export interface VirtualState<
   S extends Schema_Index = Schema_Index,
-  O extends VirtualStateOptions = {}
+  O extends VirtualStateOptions = { [key: string]: VirtualStateOptions_Item }
 > {
   store?: {};
   options: O;

@@ -61,6 +61,13 @@ export function createRequestHandler(
               virtualServer.deleteStateFile(path);
               break;
             }
+            case "statefile_option_update": {
+              const path = fields.path as any as string;
+              const optionName = fields.optionName as any as string;
+              const value = fields.value as any as string;
+              virtualServer.updateStateFileOption(path, optionName, value);
+              break;
+            }
           }
           res.end("Done");
         });

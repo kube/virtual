@@ -5,10 +5,11 @@ import { DocumentNode, execute, parse } from "graphql";
 import { createDefaultResolvers } from "./createDefaultResolvers.js";
 import { VirtualState } from "./VirtualState.js";
 
-type VirtualStateFile = {
+export type VirtualStateFile = {
   readonly path: string;
   readonly content: string;
   options?: VirtualState["options"];
+  optionsValues?: { [key: string]: any };
   compilationError?: boolean;
 };
 
@@ -19,6 +20,7 @@ type VIRTUALSERVER_EVENTS_TYPEMAP = {
   statefile_created: VirtualStateFile;
   statefile_updated: VirtualStateFile;
   statefile_deleted: { path: string };
+  option_updated: { path: string; optionName: string; value: any };
 };
 
 export type VirtualServer_Event = {
@@ -51,6 +53,11 @@ export type VirtualServer = {
   readonly updatedStateFile: (file: VirtualStateFile) => void;
   readonly deleteStateFile: (path: string) => void;
   readonly deletedStateFile: (path: string) => void;
+  readonly updateStateFileOption: (
+    path: string,
+    optionName: string,
+    value: any
+  ) => void;
 };
 
 type VirtualServerArgs = {
@@ -225,6 +232,21 @@ export function createVirtualServer(props: VirtualServerArgs): VirtualServer {
     dispatch({ type: "statefile_deleted", payload: { path } });
   };
 
+  const updateStateFileOption: VirtualServer["updateStateFileOption"] = (
+    path,
+    optionName,
+    value
+  ) => {
+    const file = stateFiles.find((file) => file.path === path);
+    if (file) {
+      file.optionsValues = { ...file.optionsValues, [optionName]: value };
+      dispatch({
+        type: "option_updated",
+        payload: { path, optionName, value },
+      });
+    }
+  };
+
   return {
     get schema() {
       return schema;
@@ -245,6 +267,7 @@ export function createVirtualServer(props: VirtualServerArgs): VirtualServer {
     updatedStateFile,
     deleteStateFile,
     deletedStateFile,
+    updateStateFileOption,
   };
 }
 
@@ -358,6 +381,25 @@ createVirtualServer.fromHttpServer = async function fromHttpServer(
     });
   };
 
+  const updateStateFileOption: VirtualServer["updateStateFileOption"] = async (
+    path,
+    optionName,
+    value
+  ) => {
+    await fetch(`${url}_virtual/emit`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        operation: "statefile_option_update",
+        path,
+        optionName,
+        value,
+      }),
+    });
+  };
+
   const resolve: VirtualServer["resolve"] = async (query) => {
     const response = await fetch(`${url}_virtual/graphql`, {
       method: "POST",
@@ -385,5 +427,6 @@ createVirtualServer.fromHttpServer = async function fromHttpServer(
     createStateFile,
     updateStateFile,
     deleteStateFile,
+    updateStateFileOption,
   };
 };

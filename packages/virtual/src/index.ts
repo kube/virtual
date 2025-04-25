@@ -3,6 +3,7 @@ export {
   createVirtualServer,
   type VirtualServer,
   type VirtualServerRemote,
+  type VirtualStateFile,
 } from "./VirtualServer.js";
 export {
   type VirtualState,
