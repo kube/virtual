@@ -1,21 +1,26 @@
 import { Schema_Index } from "@kube/structype";
 import { ResolversFromSchemaIndex } from "./ResolversFromSchemaIndex";
 
-type VirtualStateOptions_Item = {
+export type VirtualStateOptions_Item = {
   type: "Boolean" | "Number" | "String";
 };
 
-type VirtualStateOptions = {
+export type VirtualStateOptions = {
   [key: string]: VirtualStateOptions_Item;
 };
 
+export interface VirtualStateProperties<S extends Schema_Index = Schema_Index> {
+  store?: {};
+  resolvers: ResolversFromSchemaIndex<S, {}, {}>;
+}
+
+// All VirtualState/VirtualStateOptions/VitualStateProperties/VirtualStateConstructor should be renamed (maybe refactored)
 export interface VirtualState<
   S extends Schema_Index = Schema_Index,
   O extends VirtualStateOptions = { [key: string]: VirtualStateOptions_Item }
 > {
-  store?: {};
   options: O;
-  resolvers: ResolversFromSchemaIndex<S, {}, {}>;
+  (options: InferVirtualStateOptions<O>): VirtualStateProperties<S>;
 }
 
 type InferVirtualStateOptions_Item<I extends VirtualStateOptions_Item> =
@@ -27,22 +32,19 @@ type InferVirtualStateOptions_Item<I extends VirtualStateOptions_Item> =
     ? string
     : never;
 
-type InferVirtualStateOptions<O extends VirtualStateOptions> = {
+export type InferVirtualStateOptions<O extends VirtualStateOptions> = {
   [K in keyof O]: InferVirtualStateOptions_Item<O[K]>;
 };
 
 export interface VirtualStateConstructor<
-  S extends Schema_Index = Schema_Index,
-  O extends VirtualStateOptions = {}
+  S extends Schema_Index = Schema_Index
 > {
-  (
-    props:
-      | VirtualState<S, O>
-      | ((
-          options: InferVirtualStateOptions<O>
-        ) => Omit<VirtualState<S, O>, "options">)
+  (state: Omit<VirtualState<S>, "options">): VirtualState<S>;
+
+  <O extends VirtualStateOptions = {}>(
+    options: O,
+    stateFn: (
+      options: InferVirtualStateOptions<O>
+    ) => Omit<VirtualState<S, O>, "options">
   ): VirtualState<S, O>;
-  withOptions: <O extends VirtualStateOptions>(
-    options: O
-  ) => VirtualStateConstructor<S, O>;
 }

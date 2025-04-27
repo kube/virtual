@@ -30,6 +30,10 @@ const StateOption: React.FC<{
     onChange(name, value);
   }, [value]);
 
+  useEffect(() => {
+    setValue(initialValue);
+  }, [initialValue]);
+
   return (
     <>
       <div className="">{name}</div>
@@ -39,7 +43,7 @@ const StateOption: React.FC<{
         ) : option.type === "String" ? (
           <Input
             type="text"
-            value={initialValue}
+            value={value}
             onChange={(e) => setValue(e.currentTarget.value)}
           />
         ) : option.type === "Number" ? (
@@ -48,7 +52,7 @@ const StateOption: React.FC<{
               <Slider
                 max={100}
                 step={1}
-                value={value}
+                value={[value]}
                 onValueChange={(values) => setValue(values[0])}
               />
             </TooltipTrigger>

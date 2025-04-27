@@ -1,5 +1,5 @@
 import { QueryEditor } from "@graphiql/react";
-import { use, useRef, useState } from "react";
+import { use, useEffect, useRef, useState } from "react";
 import {
   PanelResizeHandle as ResizableHandle,
   Panel as ResizablePanel,
@@ -14,6 +14,22 @@ export default function GraphiqlView() {
   const query = useRef("");
   const wrapperRef = useRef<HTMLDivElement>(null);
   const [result, setResult] = useState<any>(null);
+
+  useEffect(() => {
+    return virtualServer.addEventListener(async (e) => {
+      const shouldRefetch =
+        e.type === "option_updated" ||
+        e.type === "statefile_created" ||
+        e.type === "statefile_updated" ||
+        e.type === "statefile_selected" ||
+        e.type === "schema_updated";
+
+      if (shouldRefetch) {
+        const result = await virtualServer.resolve(query.current);
+        setResult(result);
+      }
+    });
+  }, [virtualServer]);
 
   return (
     <div

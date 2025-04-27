@@ -47,13 +47,23 @@ export function createRequestHandler(
             case "statefile_create": {
               const path = fields.path as any as string;
               const content = fields.content as any as string;
-              virtualServer.createStateFile({ path, content });
+              virtualServer.createStateFile({
+                path,
+                content,
+                options: {},
+                optionsValues: {},
+              });
               break;
             }
             case "statefile_update": {
               const path = fields.path as any as string;
               const content = fields.content as any as string;
-              virtualServer.updateStateFile({ path, content });
+              virtualServer.updateStateFile({
+                path,
+                content,
+                options: {},
+                optionsValues: {},
+              });
               break;
             }
             case "statefile_delete": {
@@ -78,8 +88,12 @@ export function createRequestHandler(
         form.parse(req, async (_err, fields, _files) => {
           res.setHeader("Content-Type", "application/json");
           const query = fields.query as any as string;
-          const result = await virtualServer.resolve(query);
-          res.end(JSON.stringify(result));
+          try {
+            const result = await virtualServer.resolve(query);
+            res.end(JSON.stringify(result));
+          } catch (e) {
+            res.end(JSON.stringify({ error: e }));
+          }
         });
         break;
       }

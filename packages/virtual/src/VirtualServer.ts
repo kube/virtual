@@ -3,6 +3,7 @@ import { Schema_Index } from "@kube/structype";
 import { toGraphqlSchema } from "@kube/structype-graphql";
 import { DocumentNode, execute, parse } from "graphql";
 import { createDefaultResolvers } from "./createDefaultResolvers.js";
+import { defaultVirtualStateOptions } from "./defaultVirtualStateOptions.js";
 import { VirtualState } from "./VirtualState.js";
 
 export type VirtualStateFile = {
@@ -90,7 +91,7 @@ function mergeDeepResolvers(...resolvers: any[]) {
   return merged;
 }
 
-// THIS SHOULD BE REWRITTEN IN A FULL EVENT-DRIVEN WAY
+// THIS SHOULD BE REWRITTEN IN A FULLY REACTIVE WAY
 // POSSIBLY USING RXJS
 // FOR NOW EVERYTHING IS A MESS, JUST TO GET IT WORKING
 // AND WE CAN REFACTOR LATER
@@ -101,7 +102,13 @@ export function createVirtualServer(props: VirtualServerArgs): VirtualServer {
   let stateFiles: VirtualStateFile[] = props.initialStateFiles;
 
   let currentStateFile = stateFiles[0];
-  let compiledVirtualState = { resolvers: {}, options: {} };
+  let compiledVirtualState: VirtualState = Object.assign(
+    () => ({ resolvers: {} }),
+    { options: {} }
+  );
+  let compiledVirtualStateInstance = compiledVirtualState(
+    defaultVirtualStateOptions(compiledVirtualState)
+  );
 
   if (currentStateFile) compileState(currentStateFile);
 
@@ -110,7 +117,7 @@ export function createVirtualServer(props: VirtualServerArgs): VirtualServer {
     typeDefs: toGraphqlSchema(schema),
     resolvers: mergeDeepResolvers(
       defaultResolvers,
-      compiledVirtualState.resolvers
+      compiledVirtualStateInstance.resolvers
     ),
   });
 
@@ -124,25 +131,36 @@ export function createVirtualServer(props: VirtualServerArgs): VirtualServer {
 
   async function compileVirtualState(stateFile: VirtualStateFile) {
     const moduleUrl = `data:text/javascript,${encodeURIComponent(`
-      function VirtualState(x) { return x; }
-      VirtualState.withOptions = (options) => (x) => ({ ...x, options });
+      function VirtualState(optionsOrState, stateConstructor) {
+        return stateConstructor
+          ? Object.assign((optionsValues) => stateConstructor(optionsValues), { options: optionsOrState })
+          : () => optionsOrState;
+      }
       ${stateFile.content}
     `)}`;
     const module = await import(/* @vite-ignore */ moduleUrl);
-    return module.default;
+    return module.default as VirtualState;
   }
 
   // TODO: RENAME THIS, OR MAKE IT REALLY EVENT-DRIVEN
   async function compileState(state: VirtualStateFile) {
     try {
+      // This is a mess because we need to evaluate the state file constructor to get the options then call it again
       compiledVirtualState = await compileVirtualState(state);
       state.options = compiledVirtualState.options;
+      state.optionsValues = {
+        ...defaultVirtualStateOptions(compiledVirtualState),
+        ...state.optionsValues, // TODO: Should check that previous values are still valid
+      };
       state.compilationError = false;
+      compiledVirtualStateInstance = compiledVirtualState(
+        state.optionsValues as any
+      );
       executableSchema = makeExecutableSchema({
         typeDefs: toGraphqlSchema(schema),
         resolvers: mergeDeepResolvers(
           defaultResolvers,
-          compiledVirtualState.resolvers
+          compiledVirtualStateInstance.resolvers
         ),
       });
     } catch (err) {
@@ -163,7 +181,7 @@ export function createVirtualServer(props: VirtualServerArgs): VirtualServer {
       typeDefs: toGraphqlSchema(schema),
       resolvers: mergeDeepResolvers(
         defaultResolvers,
-        compiledVirtualState.resolvers
+        compiledVirtualStateInstance.resolvers
       ),
     });
     dispatch({ type: "schema_updated", payload: schema });
@@ -201,12 +219,19 @@ export function createVirtualServer(props: VirtualServerArgs): VirtualServer {
 
   async function createOrUpdateStateFile(file: VirtualStateFile) {
     const index = stateFiles.findIndex((f) => f.path === file.path);
+    let finalFile = file;
     if (index !== -1) {
-      stateFiles[index] = file;
+      const currentStateFile = stateFiles[index]!;
+      stateFiles[index] = {
+        ...file,
+        optionsValues: currentStateFile.optionsValues, // Preserve the current optionsValues
+      };
+      finalFile = stateFiles[index];
     } else {
       stateFiles.push(file);
     }
-    await compileState(file);
+    await compileState(finalFile);
+    return finalFile;
   }
 
   const createdStateFile: VirtualServer["createdStateFile"] = async (file) => {
@@ -219,8 +244,8 @@ export function createVirtualServer(props: VirtualServerArgs): VirtualServer {
   };
 
   const updatedStateFile: VirtualServer["updatedStateFile"] = async (file) => {
-    await createOrUpdateStateFile(file);
-    dispatch({ type: "statefile_updated", payload: file });
+    const updatedFile = await createOrUpdateStateFile(file);
+    dispatch({ type: "statefile_updated", payload: updatedFile });
   };
 
   const deleteStateFile: VirtualServer["deleteStateFile"] = (path) => {
@@ -240,6 +265,7 @@ export function createVirtualServer(props: VirtualServerArgs): VirtualServer {
     const file = stateFiles.find((file) => file.path === path);
     if (file) {
       file.optionsValues = { ...file.optionsValues, [optionName]: value };
+      compileState(file);
       dispatch({
         type: "option_updated",
         payload: { path, optionName, value },

@@ -77,11 +77,11 @@ const App: React.FC<{ virtualServer: VirtualServer }> = ({ virtualServer }) => {
       // We should not depend directly on these event types, but rather on a derived event provided by the VirtualServer directly.
       // Something like "statefile_invalidated" or something like that. (It would also only apply to currently selected state file changes)
       if (
-        event.type === "statefile_updated" ||
         event.type === "schema_updated" ||
-        event.type === "statefile_created"
+        event.type === "statefile_created" ||
+        event.type === "statefile_updated" ||
+        event.type === "option_updated"
       ) {
-        console.log("State file updated:", event);
         setStateReloadId((prev) => prev + 1);
       }
     });
