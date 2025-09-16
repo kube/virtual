@@ -41,7 +41,7 @@ const Navigation: React.FC<NavigationProps> = ({ style }) => {
     >
       <div
         style={{
-          backgroundColor: "#2563eb",
+          backgroundColor: "#475569",
           padding: "24px 20px",
           borderBottom: "1px solid #e5e7eb",
           borderRadius: "0 12px 0 0",
@@ -77,9 +77,9 @@ const Navigation: React.FC<NavigationProps> = ({ style }) => {
                 gap: "12px",
                 padding: "12px 20px",
                 textDecoration: "none",
-                color: isActive(item.path) ? "#2563eb" : "#6b7280",
+                color: isActive(item.path) ? "#475569" : "#6b7280",
                 backgroundColor: isActive(item.path)
-                  ? "#e0e7ff"
+                  ? "#f1f5f9"
                   : "transparent",
                 borderRadius: "8px",
                 margin: "4px 8px",

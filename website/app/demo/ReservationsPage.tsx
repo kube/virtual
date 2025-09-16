@@ -338,7 +338,7 @@ const ReservationsPage = () => {
                 newReservation.tableId &&
                 newReservation.date &&
                 newReservation.time
-                  ? "#2563eb"
+                  ? "#475569"
                   : "#9ca3af",
               color: "#ffffff",
               border: "none",

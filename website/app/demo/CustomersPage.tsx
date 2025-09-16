@@ -222,7 +222,7 @@ const CustomersPage = () => {
               padding: "10px 20px",
               backgroundColor:
                 newCustomer.name.trim() && newCustomer.email.trim()
-                  ? "#2563eb"
+                  ? "#475569"
                   : "#9ca3af",
               color: "#ffffff",
               border: "none",
