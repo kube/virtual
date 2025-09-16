@@ -1,70 +1,73 @@
 import {
   ApolloClient,
   ApolloLink,
-  gql,
   InMemoryCache,
   Observable,
 } from "@apollo/client";
-import { ApolloProvider, useMutation, useQuery } from "@apollo/client/react";
+import { ApolloProvider } from "@apollo/client/react";
 import type { VirtualServer } from "@kube/virtual";
 import React, { useEffect, useMemo, useState } from "react";
+import CustomersPage from "./CustomersPage";
+import { DemoRouter, Route } from "./DemoRouter";
+import Navigation from "./Navigation";
+import ReservationsPage from "./ReservationsPage";
 
-// GraphQL Queries and Mutations
-const GET_TODOS = gql`
-  query {
-    todos {
-      id
-      title
-      completed
-      createdAt
-      updatedAt
-    }
-  }
-`;
-
-const CREATE_TODO = gql`
-  mutation CreateToDo($title: String!, $completed: Boolean!) {
-    createToDo(title: $title, completed: $completed) {
-      id
-      title
-      completed
-    }
-  }
-`;
-
-const ToDoList = () => {
-  const { loading, error, data } = useQuery(GET_TODOS);
-  const [createToDo] = useMutation(CREATE_TODO);
-  const [newToDo, setNewToDo] = useState("");
-
-  if (loading) return <p>Loading...</p>;
-  if (error) return <p>Error: {error.message}</p>;
-
-  const handleAddToDo = async () => {
-    if (!newToDo.trim()) return;
-    await createToDo({
-      variables: { title: "Something new!", completed: false },
-    });
-    setNewToDo("");
-  };
-
+// Layout component with navigation
+const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   return (
-    <div>
-      <h1>ToDo List</h1>
-      <ul>
-        {data.todos.map((todo, index) => (
-          <li key={index}>
-            {todo.title} - {todo.completed ? "Completed" : "Pending"}
-          </li>
-        ))}
-      </ul>
-      <input
-        type="text"
-        value={newToDo}
-        onChange={(e) => setNewToDo(e.target.value)}
-        placeholder="Add a new task"
-      />
-      <button onClick={handleAddToDo}>Add ToDo</button>
+    <div
+      style={{
+        position: "relative",
+        minHeight: "100vh",
+        backgroundColor: "#f8f9fa",
+        fontFamily: "'Inter', 'Helvetica Neue', Helvetica, Arial, sans-serif",
+        display: "flex",
+      }}
+    >
+      <Navigation />
+      <div
+        style={{
+          flex: 1,
+          minHeight: "100vh",
+        }}
+      >
+        <div
+          style={{
+            backgroundColor: "#ffffff",
+            borderBottom: "1px solid #e5e7eb",
+            padding: "24px 32px",
+            height: "auto",
+            display: "flex",
+            alignItems: "center",
+            borderRadius: "12px 0 0 0",
+            boxShadow: "0 1px 2px 0 rgba(0, 0, 0, 0.05)",
+          }}
+        >
+          <h1
+            style={{
+              margin: 0,
+              fontSize: "20px",
+              fontWeight: "600",
+              color: "#1f2937",
+              letterSpacing: "normal",
+              lineHeight: "1.2",
+            }}
+          >
+            Restaurant Management
+          </h1>
+        </div>
+
+        <div
+          style={{
+            backgroundColor: "#ffffff",
+            minHeight: "calc(100vh - 70px)",
+            padding: "32px",
+            borderRadius: "0 0 12px 0",
+          }}
+        >
+          {children}
+        </div>
+      </div>
     </div>
   );
 };
@@ -109,7 +112,16 @@ const App: React.FC<{ virtualServer: VirtualServer }> = ({ virtualServer }) => {
 
   return (
     <ApolloProvider client={client}>
-      <ToDoList />
+      <DemoRouter initialRoute="/demo/customers">
+        <Layout>
+          <Route path="/demo/customers">
+            <CustomersPage />
+          </Route>
+          <Route path="/demo/reservations">
+            <ReservationsPage />
+          </Route>
+        </Layout>
+      </DemoRouter>
     </ApolloProvider>
   );
 };

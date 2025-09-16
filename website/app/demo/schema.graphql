@@ -1,17 +1,70 @@
-type ToDo {
+type Customer {
   id: ID!
-  title: String!
-  completed: Boolean!
+  name: String!
+  email: String!
+  phone: String
+  createdAt: String!
+}
+
+type Table {
+  id: ID!
+  number: Int!
+  capacity: Int!
+  isAvailable: Boolean!
+}
+
+type Reservation {
+  id: ID!
+  customer: Customer!
+  table: Table!
+  dateTime: String!
+  partySize: Int!
+  status: ReservationStatus!
+  notes: String
   createdAt: String!
   updatedAt: String!
 }
 
+enum ReservationStatus {
+  PENDING
+  CONFIRMED
+  SEATED
+  COMPLETED
+  CANCELLED
+}
+
 type Query {
-  todos: [ToDo!]!
+  customers: [Customer!]!
+  customer(id: ID!): Customer
+  tables: [Table!]!
+  table(id: ID!): Table
+  reservations: [Reservation!]!
+  reservation(id: ID!): Reservation
+  availableTables(dateTime: String!, partySize: Int!): [Table!]!
 }
 
 type Mutation {
-  createToDo(title: String!, completed: Boolean!): ToDo!
-  updateToDo(id: ID!, title: String, completed: Boolean): ToDo!
-  deleteToDo(id: ID!): ToDo!
+  createCustomer(name: String!, email: String!, phone: String): Customer!
+  updateCustomer(id: ID!, name: String, email: String, phone: String): Customer!
+  deleteCustomer(id: ID!): Customer!
+
+  createTable(number: Int!, capacity: Int!): Table!
+  updateTable(id: ID!, number: Int, capacity: Int, isAvailable: Boolean): Table!
+  deleteTable(id: ID!): Table!
+
+  createReservation(
+    customerId: ID!
+    tableId: ID!
+    dateTime: String!
+    partySize: Int!
+    notes: String
+  ): Reservation!
+  updateReservation(
+    id: ID!
+    status: ReservationStatus
+    dateTime: String
+    partySize: Int
+    notes: String
+  ): Reservation!
+  cancelReservation(id: ID!): Reservation!
 }
