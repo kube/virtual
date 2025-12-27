@@ -7,8 +7,8 @@ import {
 import { ApolloProvider } from "@apollo/client/react";
 import type { VirtualServer } from "@kube/virtual";
 import React, { useEffect, useMemo, useState } from "react";
+import { Route } from "../components/DemoRouter";
 import CustomersPage from "./CustomersPage";
-import { DemoRouter, Route } from "./DemoRouter";
 import Navigation from "./Navigation";
 import ReservationsPage from "./ReservationsPage";
 
@@ -18,7 +18,6 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     <div
       style={{
         position: "relative",
-        minHeight: "100vh",
         backgroundColor: "#f8f9fa",
         fontFamily: "'Inter', 'Helvetica Neue', Helvetica, Arial, sans-serif",
         display: "flex",
@@ -28,7 +27,7 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
       <div
         style={{
           flex: 1,
-          minHeight: "100vh",
+          overflowY: "auto",
         }}
       >
         <div
@@ -112,16 +111,14 @@ const App: React.FC<{ virtualServer: VirtualServer }> = ({ virtualServer }) => {
 
   return (
     <ApolloProvider client={client}>
-      <DemoRouter initialRoute="/demo/customers">
-        <Layout>
-          <Route path="/demo/customers">
-            <CustomersPage />
-          </Route>
-          <Route path="/demo/reservations">
-            <ReservationsPage />
-          </Route>
-        </Layout>
-      </DemoRouter>
+      <Layout>
+        <Route path="/customers">
+          <CustomersPage />
+        </Route>
+        <Route path="/reservations">
+          <ReservationsPage />
+        </Route>
+      </Layout>
     </ApolloProvider>
   );
 };

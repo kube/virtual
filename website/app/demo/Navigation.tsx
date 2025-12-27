@@ -1,6 +1,6 @@
 import React from "react";
 import { IoCalendar, IoPeople } from "react-icons/io5";
-import { Link, useDemoRouter } from "./DemoRouter";
+import { Link, useDemoRouter } from "../components/DemoRouter";
 
 interface NavigationProps {
   style?: React.CSSProperties;
@@ -11,12 +11,12 @@ const Navigation: React.FC<NavigationProps> = ({ style }) => {
 
   const navItems = [
     {
-      path: "/demo/customers" as const,
+      path: "/customers" as const,
       label: "Customers",
       icon: <IoPeople />,
     },
     {
-      path: "/demo/reservations" as const,
+      path: "/reservations" as const,
       label: "Reservations",
       icon: <IoCalendar />,
     },
@@ -41,9 +41,7 @@ const Navigation: React.FC<NavigationProps> = ({ style }) => {
     >
       <div
         style={{
-          backgroundColor: "#475569",
           padding: "24px 20px",
-          borderBottom: "1px solid #e5e7eb",
           borderRadius: "0 12px 0 0",
         }}
       >
@@ -52,7 +50,6 @@ const Navigation: React.FC<NavigationProps> = ({ style }) => {
             margin: 0,
             fontSize: "18px",
             fontWeight: "600",
-            color: "#ffffff",
             letterSpacing: "normal",
           }}
         >

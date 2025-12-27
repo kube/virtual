@@ -2,7 +2,7 @@ import type { ReactNode } from "react";
 import React, { createContext, useContext, useState } from "react";
 
 // Define the available routes for the demo
-export type DemoRoute = "/demo/customers" | "/demo/reservations";
+export type DemoRoute = "/customers" | "/reservations";
 
 interface DemoRouterContextType {
   currentRoute: DemoRoute;
@@ -28,7 +28,7 @@ interface DemoRouterProps {
 
 export const DemoRouter: React.FC<DemoRouterProps> = ({
   children,
-  initialRoute = "/demo/customers",
+  initialRoute = "/customers",
 }) => {
   const [currentRoute, setCurrentRoute] = useState<DemoRoute>(initialRoute);
 
